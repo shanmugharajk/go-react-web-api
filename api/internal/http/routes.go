@@ -2,27 +2,140 @@ package http
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/csrf"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/product"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/response"
 )
 
-// setupRoutes configures all application routes.
+// setupRoutes configures all application routes with proper CSRF protection.
 func (s *Server) setupRoutes() {
-	// Health check
+	// Health check (public, no CSRF, no auth)
 	s.router.Get("/healthz", s.handleHealth)
 
 	// API routes
 	s.router.Route("/api/v1", func(r chi.Router) {
-		// Auth module
-		authHandler := auth.NewHandler(s.db)
-		r.Mount("/auth", authHandler.Routes())
+		// Create CSRF middleware
+		csrfMiddleware := csrf.Protect(
+			[]byte(s.config.Auth.CSRFSecret),
+			csrf.Secure(!s.config.Auth.IsDevelopment),
+			csrf.Path("/"),
+			csrf.HttpOnly(true),
+			csrf.SameSite(csrf.SameSiteLaxMode), // Lax allows top-level navigation
+			csrf.RequestHeader("X-CSRF-Token"),
+			csrf.FieldName("csrf_token"),
+		)
 
-		// Product module
-		productHandler := product.NewHandler(s.db)
-		r.Mount("/products", productHandler.Routes())
+		// Wrap CSRF middleware to exempt Bearer token requests
+		csrfProtection := csrfProtectUnlessBearerToken(csrfMiddleware)
+
+		// Create auth handler with all dependencies
+		sessionTTL := time.Duration(s.config.Auth.SessionDuration) * time.Second
+		jwtTTL := time.Duration(s.config.Auth.JWTDuration) * time.Second
+		authHandler := auth.NewHandler(
+			s.db,
+			s.sessionStore,
+			s.jwtService,
+			s.config.Auth.IsDevelopment,
+			sessionTTL,
+			jwtTTL,
+			s.config.Auth.TrustProxy,
+		)
+
+		// =================================================================
+		// TOKEN-BASED AUTH ROUTES (for API clients: Postman, mobile, etc.)
+		// No CSRF required - Bearer tokens are not vulnerable to CSRF
+		// =================================================================
+		r.Group(func(r chi.Router) {
+			// Rate limit: 5 requests per 15 minutes
+			r.Use(RateLimitMiddleware(5, 15*time.Minute, s.config.Auth.TrustProxy))
+
+			// Token login - returns JWT for API clients
+			r.Post("/auth/token/login", authHandler.TokenLogin)
+		})
+
+		// =================================================================
+		// PUBLIC AUTH ROUTES WITH CSRF (for browser/SPA clients)
+		// CSRF protection REQUIRED - these are state-changing operations
+		// =================================================================
+		r.Group(func(r chi.Router) {
+			// Apply CSRF protection first (exempts Bearer tokens)
+			r.Use(csrfProtection)
+
+			// Rate limit: 5 requests per 15 minutes
+			r.Use(RateLimitMiddleware(5, 15*time.Minute, s.config.Auth.TrustProxy))
+
+			// Session-based login - returns session cookie + CSRF token
+			r.Post("/auth/login", authHandler.Login)
+
+			// Registration
+			r.Post("/auth/register", authHandler.Register)
+		})
+
+		// =================================================================
+		// CSRF TOKEN ENDPOINT (public, CSRF applied but permissive rate limit)
+		// =================================================================
+		r.Group(func(r chi.Router) {
+			// Apply CSRF middleware so csrf.Token(r) works correctly
+			r.Use(csrfProtection)
+
+			// Rate limit: 10 requests per minute
+			r.Use(RateLimitMiddleware(10, time.Minute, s.config.Auth.TrustProxy))
+
+			// Get CSRF token
+			r.Get("/auth/csrf", authHandler.GetCSRFToken)
+		})
+
+		// =================================================================
+		// AUTHENTICATED ROUTES WITH CSRF (state-changing operations)
+		// =================================================================
+		r.Group(func(r chi.Router) {
+			// Apply CSRF protection (exempts Bearer tokens)
+			r.Use(csrfProtection)
+
+			// Require authentication (supports both session + JWT)
+			r.Use(RequireAuth(s.sessionStore, s.jwtService))
+
+			// Logout - MUST have CSRF protection
+			r.Post("/auth/logout", authHandler.Logout)
+		})
+
+		// =================================================================
+		// AUTHENTICATED READ-ONLY ROUTES (no CSRF needed)
+		// GET requests don't change state, so CSRF is unnecessary
+		// =================================================================
+		r.Group(func(r chi.Router) {
+			// Require authentication (supports both session + JWT)
+			r.Use(RequireAuth(s.sessionStore, s.jwtService))
+
+			// Get current user
+			r.Get("/auth/me", authHandler.GetCurrentUser)
+
+			// Product read operations
+			productHandler := product.NewHandler(s.db)
+			r.Get("/products", productHandler.GetAll)
+			r.Get("/products/{id}", productHandler.GetByID)
+		})
+
+		// =================================================================
+		// PROTECTED PRODUCT MUTATION ROUTES (auth + CSRF required)
+		// =================================================================
+		r.Group(func(r chi.Router) {
+			// Apply CSRF protection (exempts Bearer tokens)
+			r.Use(csrfProtection)
+
+			// Require authentication (supports both session + JWT)
+			r.Use(RequireAuth(s.sessionStore, s.jwtService))
+
+			// Product mutations
+			productHandler := product.NewHandler(s.db)
+			r.Post("/products", productHandler.Create)
+			r.Put("/products/{id}", productHandler.Update)
+			r.Delete("/products/{id}", productHandler.Delete)
+		})
 	})
 }
 

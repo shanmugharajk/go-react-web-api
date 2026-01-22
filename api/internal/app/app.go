@@ -47,7 +47,7 @@ func New() (*App, error) {
 		&auth.User{},
 		&product.Product{},
 	); err != nil {
-		return nil, fmt.Errorf("failed to run migrations: %w", err)
+		return nil, fmt.Errorf("failed to run auto-migrations: %w", err)
 	}
 
 	// Create HTTP server

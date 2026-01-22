@@ -1,6 +1,7 @@
-# go-react-web-api
+# Go React Web API
 
-Production-style Go (Chi, GORM) and React monorepo demonstrating clean architecture, API design, and real-world patterns.
+A full-stack web application with Go backend API and React frontend.
+
 
 ## Project Structure
 
@@ -10,25 +11,47 @@ Production-style Go (Chi, GORM) and React monorepo demonstrating clean architect
 └── web/          # React frontend
 ```
 
-## Backend (api/)
+## Tech Stack
 
-Clean, idiomatic Go backend with domain-oriented architecture.
+### Backend
+- **Go** 1.25.5
+- **Chi** v5.2.4 - HTTP router
+- **GORM** v1.31.1 - ORM
+- **SQLite** - Database
+- **golang.org/x/crypto** - Password hashing (Argon2id)
+- **gorilla/csrf** v1.7.3 - CSRF protection
 
-### Tech Stack
+### Frontend
+- Coming soon
 
-- **Go 1.25.5**
-- **Router**: chi v5.2.4 - Lightweight, idiomatic HTTP router
-- **ORM**: GORM v1.31.1 - Developer-friendly ORM
-- **Database**: SQLite 3 (local development)
-- **Logging**: log/slog (standard library)
-
-### Quick Start
+## Getting Started
 
 ```bash
 cd api
-go run cmd/server/main.go
+
+# Install dependencies
+go mod download
+
+# Run the server
+go run ./cmd/server/main.go
+
+# Server starts on http://localhost:8080
 ```
 
-Server starts at `http://localhost:8080`
+Check by visiting health check endpoint - `GET /healthz`.
 
-See `api/README.md` for detailed documentation.
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `PORT` | `8080` | Server port |
+| `HOST` | `localhost` | Server host |
+| `DATABASE_DSN` | `file:./data/pos.db` | SQLite database path |
+| `AUTH_SESSION_SECRET` | - | HMAC secret for sessions (generate with `openssl rand -hex 32`) |
+| `AUTH_CSRF_SECRET` | - | CSRF token secret (generate with `openssl rand -hex 32`) |
+| `AUTH_IS_DEVELOPMENT` | `true` | Development mode (set to `false` in production) |
+| `AUTH_SESSION_DURATION` | `86400` | Session duration in seconds (default: 24 hours) |
+
+## License
+
+MIT

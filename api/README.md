@@ -14,7 +14,6 @@ api/
 │   ├── http/           # HTTP server and routing
 │   ├── modules/        # Domain modules (auth, product)
 │   └── pkg/            # Shared utilities
-└── migrations/         # Database migrations
 ```
 
 ## Getting Started

@@ -14,10 +14,11 @@ func NewRepository(database *db.DB) *Repository {
 	return &Repository{db: database}
 }
 
-// FindByEmail finds a user by email.
+// FindByEmail finds a user by email (case-insensitive).
 func (r *Repository) FindByEmail(email string) (*User, error) {
 	var user User
-	if err := r.db.Where("email = ?", email).First(&user).Error; err != nil {
+	// Case-insensitive email lookup to prevent enumeration
+	if err := r.db.Where("LOWER(email) = LOWER(?)", email).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
