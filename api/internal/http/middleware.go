@@ -23,7 +23,7 @@ func (s *Server) setupMiddleware() {
 	s.router.Use(middleware.Recoverer)
 
 	// Security headers (OWASP recommended)
-	s.router.Use(securityHeaders(s.config.Auth.IsDevelopment))
+	s.router.Use(securityHeaders(s.config.IsDevelopment))
 
 	// Timeout
 	s.router.Use(middleware.Timeout(30 * time.Second))

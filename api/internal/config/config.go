@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/joho/godotenv"
 )
 
 // Config holds all application configuration.
 type Config struct {
-	Server   ServerConfig
-	Database DatabaseConfig
-	Auth     AuthConfig
+	IsDevelopment bool
+	Server        ServerConfig
+	Database      DatabaseConfig
+	Auth          AuthConfig
 }
 
 // ServerConfig holds HTTP server configuration.
@@ -29,7 +32,6 @@ type AuthConfig struct {
 	SessionSecret   string // Secret for signing session IDs (HMAC)
 	CSRFSecret      string // Secret for CSRF token generation
 	JWTSecret       string // Secret for JWT token signing
-	IsDevelopment   bool   // Toggle for development mode (affects cookie security)
 	SessionDuration int    // Session TTL in seconds
 	JWTDuration     int    // JWT TTL in seconds
 	TrustProxy      bool   // Whether to trust X-Forwarded-For and X-Real-IP headers
@@ -37,7 +39,11 @@ type AuthConfig struct {
 
 // Load reads configuration from environment variables.
 func Load() (*Config, error) {
+	// Load .env file if it exists
+	godotenv.Load()
+
 	cfg := &Config{
+		IsDevelopment: getEnvAsBool("IS_DEVELOPMENT", false),
 		Server: ServerConfig{
 			Port: getEnvAsInt("PORT", 8080),
 			Host: getEnv("HOST", "localhost"),
@@ -49,10 +55,9 @@ func Load() (*Config, error) {
 			SessionSecret:   getEnv("AUTH_SESSION_SECRET", "dev-secret-change-in-production-min-32-chars"),
 			CSRFSecret:      getEnv("AUTH_CSRF_SECRET", "dev-csrf-secret-change-in-production-32-chars"),
 			JWTSecret:       getEnv("AUTH_JWT_SECRET", "dev-jwt-secret-change-in-production-min-32-chars"),
-			IsDevelopment:   getEnvAsBool("AUTH_IS_DEVELOPMENT", true),
-			SessionDuration: getEnvAsInt("AUTH_SESSION_DURATION", 86400),  // 24 hours
-			JWTDuration:     getEnvAsInt("AUTH_JWT_DURATION", 86400),      // 24 hours
-			TrustProxy:      getEnvAsBool("AUTH_TRUST_PROXY", false),      // Only trust proxy headers if explicitly enabled
+			SessionDuration: getEnvAsInt("AUTH_SESSION_DURATION", 86400), // 24 hours
+			JWTDuration:     getEnvAsInt("AUTH_JWT_DURATION", 86400),     // 24 hours
+			TrustProxy:      getEnvAsBool("AUTH_TRUST_PROXY", false),     // Only trust proxy headers if explicitly enabled
 		},
 	}
 
@@ -100,7 +105,7 @@ func (c *Config) ServerAddr() string {
 // Validate validates the configuration.
 func (c *Config) Validate() error {
 	// Validate secrets in production
-	if !c.Auth.IsDevelopment {
+	if !c.IsDevelopment {
 		if err := validateSecret(c.Auth.SessionSecret, "AUTH_SESSION_SECRET"); err != nil {
 			return err
 		}

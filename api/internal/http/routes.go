@@ -21,7 +21,7 @@ func (s *Server) setupRoutes() {
 		// Create CSRF middleware
 		csrfMiddleware := csrf.Protect(
 			[]byte(s.config.Auth.CSRFSecret),
-			csrf.Secure(!s.config.Auth.IsDevelopment),
+			csrf.Secure(!s.config.IsDevelopment),
 			csrf.Path("/"),
 			csrf.HttpOnly(true),
 			csrf.SameSite(csrf.SameSiteLaxMode), // Lax allows top-level navigation
@@ -39,7 +39,7 @@ func (s *Server) setupRoutes() {
 			s.db,
 			s.sessionStore,
 			s.jwtService,
-			s.config.Auth.IsDevelopment,
+			s.config.IsDevelopment,
 			sessionTTL,
 			jwtTTL,
 			s.config.Auth.TrustProxy,
@@ -55,6 +55,9 @@ func (s *Server) setupRoutes() {
 
 			// Token login - returns JWT for API clients
 			r.Post("/auth/token/login", authHandler.TokenLogin)
+
+			// Token register - returns JWT for API clients
+			r.Post("/auth/token/register", authHandler.TokenRegister)
 		})
 
 		// =================================================================

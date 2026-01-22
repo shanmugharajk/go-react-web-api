@@ -42,4 +42,3 @@ func (db *DB) Health() error {
 	}
 	return sqlDB.Ping()
 }
-

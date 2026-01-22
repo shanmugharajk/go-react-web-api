@@ -1,0 +1,37 @@
+meta {
+  name: Health Check
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/healthz
+  body: none
+  auth: none
+}
+
+tests {
+  test("should return 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should respond quickly", function() {
+    expect(res.getResponseTime()).to.be.below(500);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return status ok", function() {
+    const body = res.getBody();
+    expect(body.data).to.have.property('status');
+    expect(body.data.status).to.equal('ok');
+  });
+
+  test("should not require authentication", function() {
+    expect(res.getStatus()).to.not.equal(401);
+  });
+}

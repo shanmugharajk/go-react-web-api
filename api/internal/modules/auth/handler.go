@@ -233,3 +233,49 @@ func (h *Handler) TokenLogin(w http.ResponseWriter, r *http.Request) {
 
 	response.Success(w, tokenResp)
 }
+
+// TokenRegister handles registration requests for API clients and returns a JWT token.
+// This endpoint is designed for non-browser clients (Postman, mobile apps, CLI tools, etc.)
+// that prefer token-based authentication over cookie-based sessions.
+func (h *Handler) TokenRegister(w http.ResponseWriter, r *http.Request) {
+	var req RegisterRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		response.Error(w, http.StatusBadRequest, "invalid request body")
+		return
+	}
+
+	// Get client IP and user agent for audit logging
+	ip := iputil.ExtractClientIP(r, h.trustProxy)
+	userAgent := r.UserAgent()
+
+	user, err := h.service.Register(req, ip, userAgent)
+	if err != nil {
+		// Check if it's a password strength error
+		if err.Error() == "password validation failed: password must be at least 12 characters" ||
+		   err.Error() == "password validation failed: password must not exceed 128 characters" {
+			response.Error(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		// Generic error for everything else (prevents enumeration)
+		response.Error(w, http.StatusBadRequest, "registration failed")
+		return
+	}
+
+	// Generate JWT token
+	token, err := h.jwtService.Generate(int64(user.ID), h.jwtTTL)
+	if err != nil {
+		logger.Error("Failed to generate JWT token", "error", err, "user_id", user.ID)
+		response.Error(w, http.StatusInternalServerError, "failed to generate token")
+		return
+	}
+
+	// Return token response (RFC 6750 - Bearer Token Usage)
+	tokenResp := TokenLoginResponse{
+		AccessToken: token,
+		TokenType:   "Bearer",
+		ExpiresIn:   int(h.jwtTTL.Seconds()),
+		User:        user,
+	}
+
+	response.Success(w, tokenResp)
+}

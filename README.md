@@ -49,7 +49,7 @@ Check by visiting health check endpoint - `GET /healthz`.
 | `DATABASE_DSN` | `file:./data/pos.db` | SQLite database path |
 | `AUTH_SESSION_SECRET` | - | HMAC secret for sessions (generate with `openssl rand -hex 32`) |
 | `AUTH_CSRF_SECRET` | - | CSRF token secret (generate with `openssl rand -hex 32`) |
-| `AUTH_IS_DEVELOPMENT` | `true` | Development mode (set to `false` in production) |
+| `IS_DEVELOPMENT` | `true` | Development mode (set to `false` in production) |
 | `AUTH_SESSION_DURATION` | `86400` | Session duration in seconds (default: 24 hours) |
 
 ## License

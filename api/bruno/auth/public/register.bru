@@ -1,0 +1,76 @@
+meta {
+  name: Register (JWT Token)
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/{{apiVersion}}/auth/token/register
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "{{testUserEmail}}",
+    "password": "{{testUserPassword}}",
+    "name": "{{testUserName}}"
+  }
+}
+
+tests {
+  test("should return 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return JWT token", function() {
+    const body = res.getBody();
+    expect(body.data).to.have.property('access_token');
+    expect(body.data.access_token).to.be.a('string');
+    expect(body.data.access_token.split('.')).to.have.lengthOf(3);
+    bru.setVar('jwt_token', body.data.access_token);
+  });
+
+  test("should return token type Bearer", function() {
+    const body = res.getBody();
+    expect(body.data).to.have.property('token_type');
+    expect(body.data.token_type).to.equal('Bearer');
+  });
+
+  test("should return expiration time", function() {
+    const body = res.getBody();
+    expect(body.data).to.have.property('expires_in');
+    expect(body.data.expires_in).to.be.a('number');
+    expect(body.data.expires_in).to.be.above(0);
+  });
+
+  test("should return newly created user info", function() {
+    const body = res.getBody();
+    expect(body.data).to.have.property('user');
+    expect(body.data.user).to.have.property('id');
+    expect(body.data.user).to.have.property('email');
+    expect(body.data.user.email).to.equal('newtokenuser@example.com');
+    expect(body.data.user).to.have.property('name');
+    expect(body.data.user.name).to.equal('New Token User');
+  });
+
+  test("should not expose password", function() {
+    const body = res.getBody();
+    expect(body.data.user).to.not.have.property('password');
+  });
+
+  test("should have created_at timestamp", function() {
+    const body = res.getBody();
+    expect(body.data.user).to.have.property('created_at');
+  });
+}
