@@ -1,0 +1,51 @@
+meta {
+  name: Get Product By ID
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/{{apiVersion}}/products/{{testProductId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+tests {
+  test("should return 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return product object", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('object');
+  });
+
+  test("should return product with correct ID", function() {
+    const body = res.getBody();
+    expect(body.data).to.have.property('id');
+    expect(body.data.id).to.equal(parseInt(bru.getVar('testProductId') || '1'));
+  });
+
+  test("should return product with required fields", function() {
+    const body = res.getBody();
+    const product = body.data;
+    expect(product).to.have.property('name');
+    expect(product).to.have.property('description');
+    expect(product).to.have.property('price');
+    expect(product).to.have.property('stock');
+    expect(product).to.have.property('created_at');
+    expect(product).to.have.property('updated_at');
+    expect(product).to.have.property('created_by');
+    expect(product).to.have.property('updated_by');
+  });
+}
