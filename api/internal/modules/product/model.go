@@ -1,16 +1,21 @@
 package product
 
-import "time"
+import (
+	"time"
+
+	"github.com/shanmugharajk/go-react-web-api/api/internal/common"
+)
 
 // Product represents a product in the system.
 type Product struct {
-	ID          uint      `gorm:"primarykey" json:"id"`
-	Name        string    `gorm:"not null" json:"name"`
-	Description string    `json:"description"`
-	Price       float64   `gorm:"not null" json:"price"`
-	Stock       int       `gorm:"not null;default:0" json:"stock"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID                 uint      `gorm:"primarykey" json:"id"`
+	Name               string    `gorm:"not null" json:"name"`
+	Description        string    `json:"description"`
+	Price              float64   `gorm:"not null" json:"price"`
+	Stock              int       `gorm:"not null;default:0" json:"stock"`
+	common.AuditFields           // Embedded audit fields
+	CreatedAt          time.Time `json:"created_at"`
+	UpdatedAt          time.Time `json:"updated_at"`
 }
 
 // CreateProductRequest represents a request to create a product.
