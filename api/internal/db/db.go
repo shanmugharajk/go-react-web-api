@@ -22,6 +22,20 @@ func New(dsn string) (*DB, error) {
 		return nil, fmt.Errorf("failed to connect to database: %w", err)
 	}
 
+	// Configure SQLite pragmas for optimal transaction behavior
+	if err := gormDB.Exec("PRAGMA journal_mode = WAL").Error; err != nil {
+		return nil, fmt.Errorf("failed to set journal_mode: %w", err)
+	}
+	if err := gormDB.Exec("PRAGMA synchronous = NORMAL").Error; err != nil {
+		return nil, fmt.Errorf("failed to set synchronous mode: %w", err)
+	}
+	if err := gormDB.Exec("PRAGMA foreign_keys = ON").Error; err != nil {
+		return nil, fmt.Errorf("failed to enable foreign keys: %w", err)
+	}
+	if err := gormDB.Exec("PRAGMA busy_timeout = 5000").Error; err != nil {
+		return nil, fmt.Errorf("failed to set busy timeout: %w", err)
+	}
+
 	return &DB{DB: gormDB}, nil
 }
 
