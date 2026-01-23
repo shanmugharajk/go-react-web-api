@@ -12,9 +12,9 @@ import (
 	"github.com/shanmugharajk/go-react-web-api/api/internal/sessions"
 )
 
-// RequireAuth is a middleware that validates authentication (session or JWT) and injects user ID into context.
+// RequireAuth is a middleware that validates authentication (session or JWT) and injects user and user ID into context.
 // It supports dual authentication: cookie-based sessions OR JWT bearer tokens.
-func RequireAuth(sessionStore *sessions.SQLiteStore, jwtService *jwt.TokenService) func(http.Handler) http.Handler {
+func RequireAuth(sessionStore *sessions.SQLiteStore, jwtService *jwt.TokenService, authService *auth.Service) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			var userID int64
@@ -80,8 +80,17 @@ func RequireAuth(sessionStore *sessions.SQLiteStore, jwtService *jwt.TokenServic
 				return
 			}
 
-			// Inject user ID into context (type-safe)
-			ctx := context.WithValue(r.Context(), auth.UserIDKey, userID)
+			// Fetch the full user object from the database
+			user, err := authService.GetUserByID(uint(userID))
+			if err != nil {
+				response.Error(w, http.StatusInternalServerError, "failed to retrieve user")
+				return
+			}
+
+			// Inject both user ID and user object into context (type-safe)
+			ctx := r.Context()
+			ctx = context.WithValue(ctx, auth.UserIDKey, userID)
+			ctx = context.WithValue(ctx, auth.UserKey, user)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

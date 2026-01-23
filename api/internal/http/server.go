@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/config"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/db"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/jwt"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/logger"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/sessions"
@@ -22,6 +23,7 @@ type Server struct {
 	config       *config.Config
 	sessionStore *sessions.SQLiteStore
 	jwtService   *jwt.TokenService
+	authService  *auth.Service
 }
 
 // New creates a new HTTP server instance.
@@ -35,12 +37,17 @@ func New(cfg *config.Config, database *db.DB) *Server {
 	// Initialize JWT service
 	jwtService := jwt.NewTokenService(cfg.Auth.JWTSecret)
 
+	// Initialize auth service for user lookup
+	authRepo := auth.NewRepository(database)
+	authService := auth.NewService(authRepo)
+
 	s := &Server{
 		router:       chi.NewRouter(),
 		db:           database,
 		config:       cfg,
 		sessionStore: sessionStore,
 		jwtService:   jwtService,
+		authService:  authService,
 	}
 
 	// Setup middleware

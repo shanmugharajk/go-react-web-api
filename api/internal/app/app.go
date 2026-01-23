@@ -46,6 +46,7 @@ func New() (*App, error) {
 	if err := database.AutoMigrate(
 		&auth.User{},
 		&product.Product{},
+		&product.ProductCategory{},
 	); err != nil {
 		return nil, fmt.Errorf("failed to run auto-migrations: %w", err)
 	}

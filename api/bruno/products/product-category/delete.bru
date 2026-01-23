@@ -1,0 +1,30 @@
+meta {
+  name: Delete Product Category
+  type: http
+  seq: 14
+}
+
+delete {
+  url: {{baseUrl}}/api/{{apiVersion}}/products/categories/{{testCategoryId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+headers {
+  X-CSRF-Token: {{csrf_token}}
+}
+
+tests {
+  test("should return 204 No Content", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+
+  test("should have empty response body", function() {
+    const body = res.getBody();
+    expect(body).to.equal('');
+  });
+}

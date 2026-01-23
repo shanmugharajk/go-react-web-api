@@ -1,0 +1,62 @@
+meta {
+  name: Create Product Category
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{baseUrl}}/api/{{apiVersion}}/products/categories
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+headers {
+  Content-Type: application/json
+  X-CSRF-Token: {{csrf_token}}
+}
+
+body:json {
+  {
+    "name": "Test Category",
+    "description": "A test product category for API testing"
+  }
+}
+
+tests {
+  test("should return 201 Created", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return created category", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('object');
+    expect(body.data).to.have.property('id');
+    bru.setVar('testCategoryId', body.data.id.toString());
+  });
+
+  test("should return category with correct data", function() {
+    const body = res.getBody();
+    const category = body.data;
+    expect(category.name).to.equal('Test Category');
+    expect(category.description).to.equal('A test product category for API testing');
+  });
+
+  test("should have audit fields", function() {
+    const body = res.getBody();
+    const category = body.data;
+    expect(category).to.have.property('created_at');
+    expect(category).to.have.property('updated_at');
+    expect(category).to.have.property('created_by');
+    expect(category).to.have.property('updated_by');
+  });
+}

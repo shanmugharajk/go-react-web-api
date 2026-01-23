@@ -30,6 +30,9 @@ tests {
 
   test("should return CSRF forbidden message", function() {
     const body = res.getBody();
-    expect(body).to.equal('Forbidden - referer not supplied\n');
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(false);
+    expect(body).to.have.property('error');
+    expect(body.error).to.equal('invalid CSRF token');
   });
 }

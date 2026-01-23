@@ -18,7 +18,7 @@ func (s *Server) setupRoutes() {
 
 	// API routes
 	s.router.Route("/api/v1", func(r chi.Router) {
-		// Create CSRF middleware
+		// Create CSRF middleware with custom error handler for JSON responses
 		csrfMiddleware := csrf.Protect(
 			[]byte(s.config.Auth.CSRFSecret),
 			csrf.Secure(!s.config.IsDevelopment),
@@ -27,6 +27,9 @@ func (s *Server) setupRoutes() {
 			csrf.SameSite(csrf.SameSiteLaxMode), // Lax allows top-level navigation
 			csrf.RequestHeader("X-CSRF-Token"),
 			csrf.FieldName("csrf_token"),
+			csrf.ErrorHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				response.Error(w, http.StatusForbidden, "invalid CSRF token")
+			})),
 		)
 
 		// Wrap CSRF middleware to exempt Bearer token requests
@@ -100,7 +103,7 @@ func (s *Server) setupRoutes() {
 			r.Use(csrfProtection)
 
 			// Require authentication (supports both session + JWT)
-			r.Use(RequireAuth(s.sessionStore, s.jwtService))
+			r.Use(RequireAuth(s.sessionStore, s.jwtService, s.authService))
 
 			// Logout - MUST have CSRF protection
 			r.Post("/auth/logout", authHandler.Logout)
@@ -112,7 +115,7 @@ func (s *Server) setupRoutes() {
 		// =================================================================
 		r.Group(func(r chi.Router) {
 			// Require authentication (supports both session + JWT)
-			r.Use(RequireAuth(s.sessionStore, s.jwtService))
+			r.Use(RequireAuth(s.sessionStore, s.jwtService, s.authService))
 
 			// Get current user
 			r.Get("/auth/me", authHandler.GetCurrentUser)
@@ -121,6 +124,11 @@ func (s *Server) setupRoutes() {
 			productHandler := product.NewHandler(s.db)
 			r.Get("/products", productHandler.GetAll)
 			r.Get("/products/{id}", productHandler.GetByID)
+
+			// Product category read operations
+			categoryHandler := product.NewCategoryHandler(s.db)
+			r.Get("/products/categories", categoryHandler.GetAll)
+			r.Get("/products/categories/{id}", categoryHandler.GetByID)
 		})
 
 		// =================================================================
@@ -131,13 +139,19 @@ func (s *Server) setupRoutes() {
 			r.Use(csrfProtection)
 
 			// Require authentication (supports both session + JWT)
-			r.Use(RequireAuth(s.sessionStore, s.jwtService))
+			r.Use(RequireAuth(s.sessionStore, s.jwtService, s.authService))
 
 			// Product mutations
 			productHandler := product.NewHandler(s.db)
 			r.Post("/products", productHandler.Create)
 			r.Put("/products/{id}", productHandler.Update)
 			r.Delete("/products/{id}", productHandler.Delete)
+
+			// Product category mutations
+			categoryHandler := product.NewCategoryHandler(s.db)
+			r.Post("/products/categories", categoryHandler.Create)
+			r.Put("/products/categories/{id}", categoryHandler.Update)
+			r.Delete("/products/categories/{id}", categoryHandler.Delete)
 		})
 	})
 }
