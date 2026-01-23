@@ -58,9 +58,9 @@ tests {
   test("should have audit fields", function() {
     const body = res.getBody();
     const product = body.data;
-    expect(product).to.have.property('created_at');
-    expect(product).to.have.property('updated_at');
-    expect(product).to.have.property('created_by');
-    expect(product).to.have.property('updated_by');
+    expect(product).to.have.property('createdAt');
+    expect(product).to.have.property('updatedAt');
+    expect(product).to.have.property('createdBy');
+    expect(product).to.have.property('updatedBy');
   });
 }

@@ -41,9 +41,9 @@ tests {
     const category = body.data;
     expect(category).to.have.property('name');
     expect(category).to.have.property('description');
-    expect(category).to.have.property('created_at');
-    expect(category).to.have.property('updated_at');
-    expect(category).to.have.property('created_by');
-    expect(category).to.have.property('updated_by');
+    expect(category).to.have.property('createdAt');
+    expect(category).to.have.property('updatedAt');
+    expect(category).to.have.property('createdBy');
+    expect(category).to.have.property('updatedBy');
   });
 }

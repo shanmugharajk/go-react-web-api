@@ -3,6 +3,8 @@ package product
 import (
 	"github.com/shanmugharajk/go-react-web-api/api/internal/common"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/logger"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/validator"
 )
 
 // ProductService handles business logic for products.
@@ -27,6 +29,10 @@ func (s *ProductService) GetByID(id uint) (*Product, error) {
 
 // Create creates a new product.
 func (s *ProductService) Create(req CreateProductRequest, user *auth.User) (*Product, error) {
+	if err := validator.Struct(req); err != nil {
+		return nil, err
+	}
+
 	product := &Product{
 		Name:        req.Name,
 		Description: req.Description,
@@ -48,6 +54,10 @@ func (s *ProductService) Create(req CreateProductRequest, user *auth.User) (*Pro
 
 // Update updates an existing product.
 func (s *ProductService) Update(id uint, req UpdateProductRequest, user *auth.User) (*Product, error) {
+	if err := validator.Struct(req); err != nil {
+		return nil, err
+	}
+
 	product, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, err
@@ -69,7 +79,12 @@ func (s *ProductService) Update(id uint, req UpdateProductRequest, user *auth.Us
 
 // Delete deletes a product by ID.
 func (s *ProductService) Delete(id uint, user *auth.User) error {
-	return s.repo.Delete(id)
+	if err := s.repo.Delete(id); err != nil {
+		return err
+	}
+
+	logger.Info("product deleted", "product_id", id, "deleted_by", user.ID)
+	return nil
 }
 
 // CategoryService handles business logic for product categories.
@@ -94,6 +109,10 @@ func (s *CategoryService) GetByID(id uint) (*ProductCategory, error) {
 
 // Create creates a new product category.
 func (s *CategoryService) Create(req CreateProductCategoryRequest, user *auth.User) (*ProductCategory, error) {
+	if err := validator.Struct(req); err != nil {
+		return nil, err
+	}
+
 	category := &ProductCategory{
 		Name:        req.Name,
 		Description: req.Description,
@@ -112,6 +131,10 @@ func (s *CategoryService) Create(req CreateProductCategoryRequest, user *auth.Us
 
 // Update updates an existing product category.
 func (s *CategoryService) Update(id uint, req UpdateProductCategoryRequest, user *auth.User) (*ProductCategory, error) {
+	if err := validator.Struct(req); err != nil {
+		return nil, err
+	}
+
 	category, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, err
@@ -130,5 +153,10 @@ func (s *CategoryService) Update(id uint, req UpdateProductCategoryRequest, user
 
 // Delete deletes a product category by ID.
 func (s *CategoryService) Delete(id uint, user *auth.User) error {
-	return s.repo.Delete(id)
+	if err := s.repo.Delete(id); err != nil {
+		return err
+	}
+
+	logger.Info("product category deleted", "category_id", id, "deleted_by", user.ID)
+	return nil
 }

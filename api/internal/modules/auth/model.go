@@ -8,8 +8,8 @@ type User struct {
 	Email        string    `gorm:"uniqueIndex;not null" json:"email"`
 	PasswordHash string    `gorm:"column:password;not null" json:"-"` // Never expose password hash
 	Name         string    `gorm:"not null" json:"name"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	CreatedAt    time.Time `json:"createdAt"`
+	UpdatedAt    time.Time `json:"updatedAt"`
 }
 
 // LoginRequest represents a login request payload.
@@ -28,14 +28,14 @@ type RegisterRequest struct {
 // LoginResponse represents the response after successful login (cookie-based).
 type LoginResponse struct {
 	User      *User  `json:"user"`
-	CSRFToken string `json:"csrf_token"`
+	CSRFToken string `json:"csrfToken"`
 }
 
 // TokenLoginResponse represents the response after successful token-based login.
 // Follows RFC 6750 - The OAuth 2.0 Authorization Framework: Bearer Token Usage
 type TokenLoginResponse struct {
-	AccessToken string `json:"access_token"`
-	TokenType   string `json:"token_type"` // Always "Bearer"
-	ExpiresIn   int    `json:"expires_in"` // Token lifetime in seconds
+	AccessToken string `json:"accessToken"`
+	TokenType   string `json:"tokenType"` // Always "Bearer"
+	ExpiresIn   int    `json:"expiresIn"` // Token lifetime in seconds
 	User        *User  `json:"user"`
 }

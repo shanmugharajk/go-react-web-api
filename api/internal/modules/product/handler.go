@@ -9,6 +9,7 @@ import (
 	"github.com/shanmugharajk/go-react-web-api/api/internal/db"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/response"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/validator"
 )
 
 // Handler handles HTTP requests for products.
@@ -79,6 +80,10 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 
 	product, err := h.service.Create(req, user)
 	if err != nil {
+		if validator.IsValidationError(err) {
+			response.Error(w, http.StatusBadRequest, err.Error())
+			return
+		}
 		response.Error(w, http.StatusInternalServerError, "failed to create product")
 		return
 	}
@@ -109,6 +114,10 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 
 	product, err := h.service.Update(uint(id), req, user)
 	if err != nil {
+		if validator.IsValidationError(err) {
+			response.Error(w, http.StatusBadRequest, err.Error())
+			return
+		}
 		response.Error(w, http.StatusInternalServerError, "failed to update product")
 		return
 	}
@@ -207,6 +216,10 @@ func (h *CategoryHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	category, err := h.service.Create(req, user)
 	if err != nil {
+		if validator.IsValidationError(err) {
+			response.Error(w, http.StatusBadRequest, err.Error())
+			return
+		}
 		response.Error(w, http.StatusInternalServerError, "failed to create product category")
 		return
 	}
@@ -237,6 +250,10 @@ func (h *CategoryHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	category, err := h.service.Update(uint(id), req, user)
 	if err != nil {
+		if validator.IsValidationError(err) {
+			response.Error(w, http.StatusBadRequest, err.Error())
+			return
+		}
 		response.Error(w, http.StatusInternalServerError, "failed to update product category")
 		return
 	}

@@ -34,23 +34,23 @@ tests {
 
   test("should return JWT token", function() {
     const body = res.getBody();
-    expect(body.data).to.have.property('access_token');
-    expect(body.data.access_token).to.be.a('string');
-    expect(body.data.access_token.split('.')).to.have.lengthOf(3);
-    bru.setVar('jwt_token', body.data.access_token);
+    expect(body.data).to.have.property('accessToken');
+    expect(body.data.accessToken).to.be.a('string');
+    expect(body.data.accessToken.split('.')).to.have.lengthOf(3);
+    bru.setVar('jwt_token', body.data.accessToken);
   });
 
   test("should return token type Bearer", function() {
     const body = res.getBody();
-    expect(body.data).to.have.property('token_type');
-    expect(body.data.token_type).to.equal('Bearer');
+    expect(body.data).to.have.property('tokenType');
+    expect(body.data.tokenType).to.equal('Bearer');
   });
 
   test("should return expiration time", function() {
     const body = res.getBody();
-    expect(body.data).to.have.property('expires_in');
-    expect(body.data.expires_in).to.be.a('number');
-    expect(body.data.expires_in).to.be.above(0);
+    expect(body.data).to.have.property('expiresIn');
+    expect(body.data.expiresIn).to.be.a('number');
+    expect(body.data.expiresIn).to.be.above(0);
   });
 
   test("should return user info", function() {
