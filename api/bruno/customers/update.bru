@@ -1,0 +1,69 @@
+meta {
+  name: Update Customer
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{baseUrl}}/api/{{apiVersion}}/customers/{{testCustomerId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+headers {
+  Content-Type: application/json
+  X-CSRF-Token: {{csrf_token}}
+}
+
+body:json {
+  {
+    "email": "john.updated@example.com",
+    "balance": 5000.00,
+    "active": true
+  }
+}
+
+tests {
+  test("should return 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return updated customer", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('object');
+    expect(body.data).to.have.property('id');
+    expect(body.data.id).to.equal(parseInt(bru.getVar('testCustomerId')));
+  });
+
+  test("should return customer with updated data", function() {
+    const body = res.getBody();
+    const customer = body.data;
+    expect(customer.email).to.equal('john.updated@example.com');
+    expect(customer.balance).to.equal(5000.00);
+    expect(customer.active).to.equal(true);
+  });
+
+  test("should preserve immutable fields", function() {
+    const body = res.getBody();
+    const customer = body.data;
+    expect(customer.name).to.equal('John Doe');
+    expect(customer.mobile).to.equal('+1234567890');
+  });
+
+  test("should have updated audit fields", function() {
+    const body = res.getBody();
+    const customer = body.data;
+    expect(customer).to.have.property('updatedAt');
+    expect(customer).to.have.property('updatedBy');
+  });
+}

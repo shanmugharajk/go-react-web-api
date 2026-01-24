@@ -14,6 +14,7 @@ import (
 	"github.com/shanmugharajk/go-react-web-api/api/internal/db"
 	httpserver "github.com/shanmugharajk/go-react-web-api/api/internal/http"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/customer"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/product"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/logger"
 )
@@ -47,6 +48,7 @@ func New() (*App, error) {
 		&auth.User{},
 		&product.Product{},
 		&product.ProductCategory{},
+		&customer.Customer{},
 	); err != nil {
 		return nil, fmt.Errorf("failed to run auto-migrations: %w", err)
 	}

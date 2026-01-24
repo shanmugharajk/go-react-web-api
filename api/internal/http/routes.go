@@ -7,6 +7,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/csrf"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/customer"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/product"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/response"
 )
@@ -129,6 +130,11 @@ func (s *Server) setupRoutes() {
 			categoryHandler := product.NewCategoryHandler(s.db)
 			r.Get("/products/categories", categoryHandler.GetAll)
 			r.Get("/products/categories/{id}", categoryHandler.GetByID)
+
+			// Customer read operations
+			customerHandler := customer.NewHandler(s.db)
+			r.Get("/customers", customerHandler.GetAll)
+			r.Get("/customers/{id}", customerHandler.GetByID)
 		})
 
 		// =================================================================
@@ -152,6 +158,12 @@ func (s *Server) setupRoutes() {
 			r.Post("/products/categories", categoryHandler.Create)
 			r.Put("/products/categories/{id}", categoryHandler.Update)
 			r.Delete("/products/categories/{id}", categoryHandler.Delete)
+
+			// Customer mutations
+			customerHandler := customer.NewHandler(s.db)
+			r.Post("/customers", customerHandler.Create)
+			r.Put("/customers/{id}", customerHandler.Update)
+			r.Delete("/customers/{id}", customerHandler.Delete)
 		})
 	})
 }
