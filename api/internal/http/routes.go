@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/csrf"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/customer"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/inventory"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/product"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/response"
 )
@@ -135,6 +136,12 @@ func (s *Server) setupRoutes() {
 			customerHandler := customer.NewHandler(s.db)
 			r.Get("/customers", customerHandler.GetAll)
 			r.Get("/customers/{id}", customerHandler.GetByID)
+
+			// Inventory batch read operations
+			batchHandler := inventory.NewBatchHandler(s.db)
+			r.Get("/inventory/batches", batchHandler.GetAll)
+			r.Get("/inventory/batches/{id}", batchHandler.GetByID)
+			r.Get("/inventory/products/{productId}/batches", batchHandler.GetByProductID)
 		})
 
 		// =================================================================
@@ -164,6 +171,12 @@ func (s *Server) setupRoutes() {
 			r.Post("/customers", customerHandler.Create)
 			r.Put("/customers/{id}", customerHandler.Update)
 			r.Delete("/customers/{id}", customerHandler.Delete)
+
+			// Inventory batch mutations
+			batchHandler := inventory.NewBatchHandler(s.db)
+			r.Post("/inventory/batches", batchHandler.Create)
+			r.Put("/inventory/batches/{id}", batchHandler.Update)
+			r.Delete("/inventory/batches/{id}", batchHandler.Delete)
 		})
 	})
 }

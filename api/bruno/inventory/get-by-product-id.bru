@@ -1,0 +1,55 @@
+meta {
+  name: Get Batches By Product ID
+  type: http
+  seq: 13
+}
+
+get {
+  url: {{baseUrl}}/api/{{apiVersion}}/inventory/products/{{testProductId}}/batches
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+tests {
+  test("should return 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return array of batches", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('array');
+  });
+
+  test("should return batches for the specific product", function() {
+    const body = res.getBody();
+    const testProductId = bru.getVar('testProductId');
+    if (body.data.length > 0) {
+      body.data.forEach(batch => {
+        expect(batch.productId).to.equal(testProductId);
+      });
+    }
+  });
+
+  test("should return batches with required fields", function() {
+    const body = res.getBody();
+    if (body.data.length > 0) {
+      const batch = body.data[0];
+      expect(batch).to.have.property('id');
+      expect(batch).to.have.property('productId');
+      expect(batch).to.have.property('costPrice');
+      expect(batch).to.have.property('sellingPrice');
+      expect(batch).to.have.property('quantity');
+      expect(batch).to.have.property('purchasedAt');
+    }
+  });
+}

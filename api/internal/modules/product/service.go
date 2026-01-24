@@ -34,12 +34,16 @@ func (s *ProductService) Create(req CreateProductRequest, user *auth.User) (*Pro
 		return nil, err
 	}
 
+	isActive := true
+	if req.IsActive != nil {
+		isActive = *req.IsActive
+	}
+
 	product := &Product{
 		Name:        req.Name,
 		Description: req.Description,
-		Price:       req.Price,
-		Stock:       req.Stock,
 		CategoryID:  req.CategoryID,
+		IsActive:    isActive,
 		AuditFields: common.AuditFields{
 			CreatedBy: user.ID,
 			UpdatedBy: user.ID,
@@ -66,9 +70,10 @@ func (s *ProductService) Update(id uuid.UUID, req UpdateProductRequest, user *au
 
 	product.Name = req.Name
 	product.Description = req.Description
-	product.Price = req.Price
-	product.Stock = req.Stock
 	product.CategoryID = req.CategoryID
+	if req.IsActive != nil {
+		product.IsActive = *req.IsActive
+	}
 	product.UpdatedBy = user.ID
 
 	if err := s.repo.Update(product); err != nil {

@@ -37,13 +37,12 @@ tests {
       expect(product).to.have.property('id');
       expect(product).to.have.property('name');
       expect(product).to.have.property('description');
-      expect(product).to.have.property('price');
-      expect(product).to.have.property('stock');
-      expect(product).to.have.property('category_id');
-      expect(product).to.have.property('created_at');
-      expect(product).to.have.property('updated_at');
-      expect(product).to.have.property('created_by');
-      expect(product).to.have.property('updated_by');
+      expect(product).to.have.property('categoryId');
+      expect(product).to.have.property('isActive');
+      expect(product).to.have.property('createdAt');
+      expect(product).to.have.property('updatedAt');
+      expect(product).to.have.property('createdBy');
+      expect(product).to.have.property('updatedBy');
     }
   });
 }

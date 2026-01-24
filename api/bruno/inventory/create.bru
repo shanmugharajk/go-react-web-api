@@ -1,0 +1,66 @@
+meta {
+  name: Create Batch
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/{{apiVersion}}/inventory/batches
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+headers {
+  Content-Type: application/json
+  X-CSRF-Token: {{csrf_token}}
+}
+
+body:json {
+  {
+    "productId": "{{testProductId}}",
+    "costPrice": 15.00,
+    "sellingPrice": 29.99,
+    "quantity": 100,
+    "purchasedAt": "2024-01-15T10:00:00Z"
+  }
+}
+
+tests {
+  test("should return 201 Created", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return created batch", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('object');
+    expect(body.data).to.have.property('id');
+    bru.setVar('testBatchId', body.data.id.toString());
+  });
+
+  test("should return batch with correct data", function() {
+    const body = res.getBody();
+    const batch = body.data;
+    expect(batch.costPrice).to.equal(15.00);
+    expect(batch.sellingPrice).to.equal(29.99);
+    expect(batch.quantity).to.equal(100);
+  });
+
+  test("should have audit fields", function() {
+    const body = res.getBody();
+    const batch = body.data;
+    expect(batch).to.have.property('createdAt');
+    expect(batch).to.have.property('updatedAt');
+    expect(batch).to.have.property('createdBy');
+    expect(batch).to.have.property('updatedBy');
+  });
+}

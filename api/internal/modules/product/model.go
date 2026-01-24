@@ -10,9 +10,8 @@ type Product struct {
 	ID          uuid.UUID  `gorm:"type:char(36);primarykey" json:"id"`
 	Name        string     `gorm:"unique;not null" json:"name"`
 	Description string     `json:"description"`
-	Price       float64    `gorm:"not null" json:"price"`
-	Stock       int        `gorm:"not null;default:0" json:"stock"`
 	CategoryID  *uuid.UUID `gorm:"type:char(36)" json:"categoryId"`
+	IsActive    bool       `gorm:"not null;default:true" json:"isActive"`
 	common.AuditFields
 }
 
@@ -20,18 +19,16 @@ type Product struct {
 type CreateProductRequest struct {
 	Name        string     `json:"name" validate:"required,min=1,max=255"`
 	Description string     `json:"description" validate:"max=1000"`
-	Price       float64    `json:"price" validate:"required,gte=0"`
-	Stock       int        `json:"stock" validate:"gte=0"`
-	CategoryID  *uuid.UUID `json:"category_id" validate:"omitempty"`
+	CategoryID  *uuid.UUID `json:"categoryId" validate:"omitempty"`
+	IsActive    *bool      `json:"isActive"`
 }
 
 // UpdateProductRequest represents a request to update a product.
 type UpdateProductRequest struct {
 	Name        string     `json:"name" validate:"required,min=1,max=255"`
 	Description string     `json:"description" validate:"max=1000"`
-	Price       float64    `json:"price" validate:"required,gte=0"`
-	Stock       int        `json:"stock" validate:"gte=0"`
-	CategoryID  *uuid.UUID `json:"category_id" validate:"omitempty"`
+	CategoryID  *uuid.UUID `json:"categoryId" validate:"omitempty"`
+	IsActive    *bool      `json:"isActive"`
 }
 
 // ProductCategory represents a product category in the system.

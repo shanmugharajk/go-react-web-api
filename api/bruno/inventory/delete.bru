@@ -1,11 +1,11 @@
 meta {
-  name: Delete Product
+  name: Delete Batch
   type: http
-  seq: 20
+  seq: 15
 }
 
 delete {
-  url: {{baseUrl}}/api/{{apiVersion}}/products/{{testProductId}}
+  url: {{baseUrl}}/api/{{apiVersion}}/inventory/batches/{{testBatchId}}
   body: none
   auth: bearer
 }
