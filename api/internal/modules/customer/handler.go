@@ -3,9 +3,9 @@ package customer
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/db"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/response"
@@ -48,13 +48,13 @@ func (h *Handler) GetAll(w http.ResponseWriter, r *http.Request) {
 // GetByID retrieves a customer by ID.
 func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, "Invalid customer ID")
 		return
 	}
 
-	customer, err := h.service.GetByID(uint(id))
+	customer, err := h.service.GetByID(id)
 	if err != nil {
 		response.Error(w, http.StatusNotFound, "Customer not found")
 		return
@@ -93,7 +93,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 // Update updates an existing customer.
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, "Invalid customer ID")
 		return
@@ -111,7 +111,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	customer, err := h.service.Update(uint(id), req, user)
+	customer, err := h.service.Update(id, req, user)
 	if err != nil {
 		if validator.IsValidationError(err) {
 			response.Error(w, http.StatusBadRequest, err.Error())
@@ -127,13 +127,13 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 // Delete deletes a customer (soft delete).
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, "Invalid customer ID")
 		return
 	}
 
-	if err := h.service.Delete(uint(id)); err != nil {
+	if err := h.service.Delete(id); err != nil {
 		response.Error(w, http.StatusInternalServerError, "Failed to delete customer")
 		return
 	}

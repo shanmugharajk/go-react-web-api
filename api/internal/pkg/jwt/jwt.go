@@ -21,7 +21,7 @@ var (
 
 // Claims represents the JWT claims for authentication.
 type Claims struct {
-	UserID int64 `json:"user_id"`
+	UserID string `json:"user_id"`
 	jwt.RegisteredClaims
 }
 
@@ -38,7 +38,7 @@ func NewTokenService(secret string) *TokenService {
 }
 
 // Generate creates a new JWT token for the given user ID with specified duration.
-func (s *TokenService) Generate(userID int64, duration time.Duration) (string, error) {
+func (s *TokenService) Generate(userID string, duration time.Duration) (string, error) {
 	now := time.Now()
 
 	claims := Claims{
@@ -62,7 +62,7 @@ func (s *TokenService) Generate(userID int64, duration time.Duration) (string, e
 }
 
 // Validate validates a JWT token and returns the user ID.
-func (s *TokenService) Validate(tokenString string) (int64, error) {
+func (s *TokenService) Validate(tokenString string) (string, error) {
 	// Parse and validate token
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		// Validate signing method
@@ -74,15 +74,15 @@ func (s *TokenService) Validate(tokenString string) (int64, error) {
 
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenExpired) {
-			return 0, ErrExpiredToken
+			return "", ErrExpiredToken
 		}
-		return 0, ErrInvalidToken
+		return "", ErrInvalidToken
 	}
 
 	// Extract claims
 	claims, ok := token.Claims.(*Claims)
 	if !ok || !token.Valid {
-		return 0, ErrInvalidClaims
+		return "", ErrInvalidClaims
 	}
 
 	return claims.UserID, nil
@@ -90,7 +90,7 @@ func (s *TokenService) Validate(tokenString string) (int64, error) {
 
 // ValidateAndRefresh validates a token and returns a new token if it's close to expiry.
 // Returns (userID, newToken, error). newToken is empty string if refresh not needed.
-func (s *TokenService) ValidateAndRefresh(tokenString string, refreshThreshold, newDuration time.Duration) (int64, string, error) {
+func (s *TokenService) ValidateAndRefresh(tokenString string, refreshThreshold, newDuration time.Duration) (string, string, error) {
 	// Parse token
 	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -101,14 +101,14 @@ func (s *TokenService) ValidateAndRefresh(tokenString string, refreshThreshold, 
 
 	if err != nil {
 		if errors.Is(err, jwt.ErrTokenExpired) {
-			return 0, "", ErrExpiredToken
+			return "", "", ErrExpiredToken
 		}
-		return 0, "", ErrInvalidToken
+		return "", "", ErrInvalidToken
 	}
 
 	claims, ok := token.Claims.(*Claims)
 	if !ok || !token.Valid {
-		return 0, "", ErrInvalidClaims
+		return "", "", ErrInvalidClaims
 	}
 
 	// Check if token needs refresh (within threshold of expiry)

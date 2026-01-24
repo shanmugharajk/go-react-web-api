@@ -78,7 +78,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Create session
-	session, err := h.sessionStore.Create(int64(user.ID), h.sessionTTL)
+	session, err := h.sessionStore.Create(user.ID.String(), h.sessionTTL)
 	if err != nil {
 		logger.Error("Failed to create session", "error", err, "user_id", user.ID)
 		response.Error(w, http.StatusInternalServerError, "failed to create session")
@@ -184,7 +184,7 @@ func (h *Handler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Fetch user from database
-	user, err := h.service.GetUserByID(uint(userID))
+	user, err := h.service.GetUserByID(userID)
 	if err != nil {
 		logger.Error("Failed to get user", "error", err, "user_id", userID)
 		response.Error(w, http.StatusInternalServerError, "failed to get user")
@@ -216,7 +216,7 @@ func (h *Handler) TokenLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate JWT token
-	token, err := h.jwtService.Generate(int64(user.ID), h.jwtTTL)
+	token, err := h.jwtService.Generate(user.ID.String(), h.jwtTTL)
 	if err != nil {
 		logger.Error("Failed to generate JWT token", "error", err, "user_id", user.ID)
 		response.Error(w, http.StatusInternalServerError, "failed to generate token")
@@ -262,7 +262,7 @@ func (h *Handler) TokenRegister(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Generate JWT token
-	token, err := h.jwtService.Generate(int64(user.ID), h.jwtTTL)
+	token, err := h.jwtService.Generate(user.ID.String(), h.jwtTTL)
 	if err != nil {
 		logger.Error("Failed to generate JWT token", "error", err, "user_id", user.ID)
 		response.Error(w, http.StatusInternalServerError, "failed to generate token")

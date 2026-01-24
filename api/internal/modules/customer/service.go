@@ -1,6 +1,7 @@
 package customer
 
 import (
+	"github.com/google/uuid"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/common"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/validator"
@@ -22,7 +23,7 @@ func (s *CustomerService) GetAll() ([]Customer, error) {
 }
 
 // GetByID retrieves a customer by ID.
-func (s *CustomerService) GetByID(id uint) (*Customer, error) {
+func (s *CustomerService) GetByID(id uuid.UUID) (*Customer, error) {
 	return s.repo.FindByID(id)
 }
 
@@ -53,7 +54,7 @@ func (s *CustomerService) Create(req CreateCustomerRequest, user *auth.User) (*C
 }
 
 // Update updates an existing customer.
-func (s *CustomerService) Update(id uint, req UpdateCustomerRequest, user *auth.User) (*Customer, error) {
+func (s *CustomerService) Update(id uuid.UUID, req UpdateCustomerRequest, user *auth.User) (*Customer, error) {
 	// Validate request
 	if err := validator.Struct(req); err != nil {
 		return nil, err
@@ -77,6 +78,6 @@ func (s *CustomerService) Update(id uint, req UpdateCustomerRequest, user *auth.
 }
 
 // Delete soft deletes a customer.
-func (s *CustomerService) Delete(id uint) error {
+func (s *CustomerService) Delete(id uuid.UUID) error {
 	return s.repo.Delete(id)
 }

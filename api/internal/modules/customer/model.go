@@ -1,17 +1,18 @@
 package customer
 
 import (
+	"github.com/google/uuid"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/common"
 )
 
 // Customer represents a customer in the system.
 type Customer struct {
-	ID      uint    `gorm:"primarykey" json:"id"`
-	Name    string  `gorm:"not null" json:"name"`
-	Email   string  `gorm:"unique;not null" json:"email"`
-	Mobile  string  `gorm:"not null" json:"mobile"`
-	Balance float64 `gorm:"default:0" json:"balance"`
-	Active  bool    `gorm:"default:true" json:"active"`
+	ID      uuid.UUID `gorm:"type:char(36);primarykey" json:"id"`
+	Name    string    `gorm:"not null" json:"name"`
+	Email   string    `gorm:"unique;not null" json:"email"`
+	Mobile  string    `gorm:"not null" json:"mobile"`
+	Balance float64   `gorm:"default:0" json:"balance"`
+	Active  bool      `gorm:"default:true" json:"active"`
 	common.AuditFields
 }
 

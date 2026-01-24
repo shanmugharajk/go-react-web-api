@@ -3,6 +3,8 @@ package auth
 import (
 	"context"
 	"errors"
+
+	"github.com/google/uuid"
 )
 
 // contextKey is a type-safe key for context values.
@@ -18,10 +20,10 @@ const (
 )
 
 // GetUserIDFromContext extracts the user ID from the request context.
-func GetUserIDFromContext(ctx context.Context) (int64, error) {
-	userID, ok := ctx.Value(UserIDKey).(int64)
+func GetUserIDFromContext(ctx context.Context) (uuid.UUID, error) {
+	userID, ok := ctx.Value(UserIDKey).(uuid.UUID)
 	if !ok {
-		return 0, errors.New("user ID not found in context")
+		return uuid.Nil, errors.New("user ID not found in context")
 	}
 	return userID, nil
 }

@@ -3,9 +3,9 @@ package product
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/db"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/response"
@@ -49,13 +49,13 @@ func (h *Handler) GetAll(w http.ResponseWriter, r *http.Request) {
 // GetByID handles retrieving a product by ID.
 func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, "invalid product ID")
 		return
 	}
 
-	product, err := h.service.GetByID(uint(id))
+	product, err := h.service.GetByID(id)
 	if err != nil {
 		response.Error(w, http.StatusNotFound, "product not found")
 		return
@@ -94,7 +94,7 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 // Update handles updating a product.
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, "invalid product ID")
 		return
@@ -112,7 +112,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	product, err := h.service.Update(uint(id), req, user)
+	product, err := h.service.Update(id, req, user)
 	if err != nil {
 		if validator.IsValidationError(err) {
 			response.Error(w, http.StatusBadRequest, err.Error())
@@ -128,7 +128,7 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 // Delete handles deleting a product.
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, "invalid product ID")
 		return
@@ -140,7 +140,7 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.service.Delete(uint(id), user); err != nil {
+	if err := h.service.Delete(id, user); err != nil {
 		response.Error(w, http.StatusInternalServerError, "failed to delete product")
 		return
 	}
@@ -185,13 +185,13 @@ func (h *CategoryHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 // GetByID handles retrieving a product category by ID.
 func (h *CategoryHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, "invalid category ID")
 		return
 	}
 
-	category, err := h.service.GetByID(uint(id))
+	category, err := h.service.GetByID(id)
 	if err != nil {
 		response.Error(w, http.StatusNotFound, "product category not found")
 		return
@@ -230,7 +230,7 @@ func (h *CategoryHandler) Create(w http.ResponseWriter, r *http.Request) {
 // Update handles updating a product category.
 func (h *CategoryHandler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, "invalid category ID")
 		return
@@ -248,7 +248,7 @@ func (h *CategoryHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	category, err := h.service.Update(uint(id), req, user)
+	category, err := h.service.Update(id, req, user)
 	if err != nil {
 		if validator.IsValidationError(err) {
 			response.Error(w, http.StatusBadRequest, err.Error())
@@ -264,7 +264,7 @@ func (h *CategoryHandler) Update(w http.ResponseWriter, r *http.Request) {
 // Delete handles deleting a product category.
 func (h *CategoryHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		response.Error(w, http.StatusBadRequest, "invalid category ID")
 		return
@@ -276,7 +276,7 @@ func (h *CategoryHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.service.Delete(uint(id), user); err != nil {
+	if err := h.service.Delete(id, user); err != nil {
 		response.Error(w, http.StatusInternalServerError, "failed to delete product category")
 		return
 	}

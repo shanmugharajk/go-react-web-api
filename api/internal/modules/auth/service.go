@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/crypto"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/logger"
 	"gorm.io/gorm"
@@ -120,6 +121,6 @@ func (s *Service) Register(req RegisterRequest, ip, userAgent string) (*User, er
 }
 
 // GetUserByID retrieves a user by ID.
-func (s *Service) GetUserByID(id uint) (*User, error) {
+func (s *Service) GetUserByID(id uuid.UUID) (*User, error) {
 	return s.repo.FindByID(id)
 }

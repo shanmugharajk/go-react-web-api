@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/jwt"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/response"
@@ -17,7 +18,7 @@ import (
 func RequireAuth(sessionStore *sessions.SQLiteStore, jwtService *jwt.TokenService, authService *auth.Service) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			var userID int64
+			var userID string
 			var authenticated bool
 
 			// Try JWT Bearer token first (for API clients)
@@ -80,8 +81,15 @@ func RequireAuth(sessionStore *sessions.SQLiteStore, jwtService *jwt.TokenServic
 				return
 			}
 
+			// Parse user ID from string to UUID
+			userUUID, err := uuid.Parse(userID)
+			if err != nil {
+				response.Error(w, http.StatusInternalServerError, "invalid user id format")
+				return
+			}
+
 			// Fetch the full user object from the database
-			user, err := authService.GetUserByID(uint(userID))
+			user, err := authService.GetUserByID(userUUID)
 			if err != nil {
 				response.Error(w, http.StatusInternalServerError, "failed to retrieve user")
 				return
@@ -89,7 +97,7 @@ func RequireAuth(sessionStore *sessions.SQLiteStore, jwtService *jwt.TokenServic
 
 			// Inject both user ID and user object into context (type-safe)
 			ctx := r.Context()
-			ctx = context.WithValue(ctx, auth.UserIDKey, userID)
+			ctx = context.WithValue(ctx, auth.UserIDKey, userUUID)
 			ctx = context.WithValue(ctx, auth.UserKey, user)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})

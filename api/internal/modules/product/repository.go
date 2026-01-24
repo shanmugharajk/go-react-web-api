@@ -1,6 +1,7 @@
 package product
 
 import (
+	"github.com/google/uuid"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/db"
 )
 
@@ -24,7 +25,7 @@ func (r *ProductRepository) FindAll() ([]Product, error) {
 }
 
 // FindByID retrieves a product by ID.
-func (r *ProductRepository) FindByID(id uint) (*Product, error) {
+func (r *ProductRepository) FindByID(id uuid.UUID) (*Product, error) {
 	var product Product
 	if err := r.db.First(&product, id).Error; err != nil {
 		return nil, err
@@ -34,6 +35,9 @@ func (r *ProductRepository) FindByID(id uint) (*Product, error) {
 
 // Create creates a new product.
 func (r *ProductRepository) Create(product *Product) error {
+	if product.ID == uuid.Nil {
+		product.ID = uuid.New()
+	}
 	return r.db.Create(product).Error
 }
 
@@ -43,7 +47,7 @@ func (r *ProductRepository) Update(product *Product) error {
 }
 
 // Delete deletes a product by ID.
-func (r *ProductRepository) Delete(id uint) error {
+func (r *ProductRepository) Delete(id uuid.UUID) error {
 	return r.db.Delete(&Product{}, id).Error
 }
 
@@ -67,7 +71,7 @@ func (r *CategoryRepository) FindAll() ([]ProductCategory, error) {
 }
 
 // FindByID retrieves a product category by ID.
-func (r *CategoryRepository) FindByID(id uint) (*ProductCategory, error) {
+func (r *CategoryRepository) FindByID(id uuid.UUID) (*ProductCategory, error) {
 	var category ProductCategory
 	if err := r.db.First(&category, id).Error; err != nil {
 		return nil, err
@@ -77,6 +81,9 @@ func (r *CategoryRepository) FindByID(id uint) (*ProductCategory, error) {
 
 // Create creates a new product category.
 func (r *CategoryRepository) Create(category *ProductCategory) error {
+	if category.ID == uuid.Nil {
+		category.ID = uuid.New()
+	}
 	return r.db.Create(category).Error
 }
 
@@ -86,6 +93,6 @@ func (r *CategoryRepository) Update(category *ProductCategory) error {
 }
 
 // Delete deletes a product category by ID.
-func (r *CategoryRepository) Delete(id uint) error {
+func (r *CategoryRepository) Delete(id uuid.UUID) error {
 	return r.db.Delete(&ProductCategory{}, id).Error
 }

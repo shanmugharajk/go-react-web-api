@@ -1,6 +1,7 @@
 package product
 
 import (
+	"github.com/google/uuid"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/common"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/logger"
@@ -23,7 +24,7 @@ func (s *ProductService) GetAll() ([]Product, error) {
 }
 
 // GetByID retrieves a product by ID.
-func (s *ProductService) GetByID(id uint) (*Product, error) {
+func (s *ProductService) GetByID(id uuid.UUID) (*Product, error) {
 	return s.repo.FindByID(id)
 }
 
@@ -53,7 +54,7 @@ func (s *ProductService) Create(req CreateProductRequest, user *auth.User) (*Pro
 }
 
 // Update updates an existing product.
-func (s *ProductService) Update(id uint, req UpdateProductRequest, user *auth.User) (*Product, error) {
+func (s *ProductService) Update(id uuid.UUID, req UpdateProductRequest, user *auth.User) (*Product, error) {
 	if err := validator.Struct(req); err != nil {
 		return nil, err
 	}
@@ -78,7 +79,7 @@ func (s *ProductService) Update(id uint, req UpdateProductRequest, user *auth.Us
 }
 
 // Delete deletes a product by ID.
-func (s *ProductService) Delete(id uint, user *auth.User) error {
+func (s *ProductService) Delete(id uuid.UUID, user *auth.User) error {
 	if err := s.repo.Delete(id); err != nil {
 		return err
 	}
@@ -103,7 +104,7 @@ func (s *CategoryService) GetAll() ([]ProductCategory, error) {
 }
 
 // GetByID retrieves a product category by ID.
-func (s *CategoryService) GetByID(id uint) (*ProductCategory, error) {
+func (s *CategoryService) GetByID(id uuid.UUID) (*ProductCategory, error) {
 	return s.repo.FindByID(id)
 }
 
@@ -130,7 +131,7 @@ func (s *CategoryService) Create(req CreateProductCategoryRequest, user *auth.Us
 }
 
 // Update updates an existing product category.
-func (s *CategoryService) Update(id uint, req UpdateProductCategoryRequest, user *auth.User) (*ProductCategory, error) {
+func (s *CategoryService) Update(id uuid.UUID, req UpdateProductCategoryRequest, user *auth.User) (*ProductCategory, error) {
 	if err := validator.Struct(req); err != nil {
 		return nil, err
 	}
@@ -152,7 +153,7 @@ func (s *CategoryService) Update(id uint, req UpdateProductCategoryRequest, user
 }
 
 // Delete deletes a product category by ID.
-func (s *CategoryService) Delete(id uint, user *auth.User) error {
+func (s *CategoryService) Delete(id uuid.UUID, user *auth.User) error {
 	if err := s.repo.Delete(id); err != nil {
 		return err
 	}

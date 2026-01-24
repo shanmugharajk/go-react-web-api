@@ -1,6 +1,7 @@
 package customer
 
 import (
+	"github.com/google/uuid"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/db"
 )
 
@@ -24,7 +25,7 @@ func (r *CustomerRepository) FindAll() ([]Customer, error) {
 }
 
 // FindByID retrieves a customer by ID.
-func (r *CustomerRepository) FindByID(id uint) (*Customer, error) {
+func (r *CustomerRepository) FindByID(id uuid.UUID) (*Customer, error) {
 	var customer Customer
 	if err := r.db.First(&customer, id).Error; err != nil {
 		return nil, err
@@ -34,6 +35,9 @@ func (r *CustomerRepository) FindByID(id uint) (*Customer, error) {
 
 // Create inserts a new customer into the database.
 func (r *CustomerRepository) Create(customer *Customer) error {
+	if customer.ID == uuid.Nil {
+		customer.ID = uuid.New()
+	}
 	return r.db.Create(customer).Error
 }
 
@@ -43,6 +47,6 @@ func (r *CustomerRepository) Update(customer *Customer) error {
 }
 
 // Delete soft deletes a customer by setting active to false.
-func (r *CustomerRepository) Delete(id uint) error {
+func (r *CustomerRepository) Delete(id uuid.UUID) error {
 	return r.db.Model(&Customer{}).Where("id = ?", id).Update("active", false).Error
 }

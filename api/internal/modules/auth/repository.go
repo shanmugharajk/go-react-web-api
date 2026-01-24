@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"github.com/google/uuid"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/db"
 )
 
@@ -26,11 +27,14 @@ func (r *Repository) FindByEmail(email string) (*User, error) {
 
 // Create creates a new user.
 func (r *Repository) Create(user *User) error {
+	if user.ID == uuid.Nil {
+		user.ID = uuid.New()
+	}
 	return r.db.Create(user).Error
 }
 
 // FindByID finds a user by ID.
-func (r *Repository) FindByID(id uint) (*User, error) {
+func (r *Repository) FindByID(id uuid.UUID) (*User, error) {
 	var user User
 	if err := r.db.First(&user, id).Error; err != nil {
 		return nil, err

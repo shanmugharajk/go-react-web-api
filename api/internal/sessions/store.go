@@ -22,7 +22,7 @@ var (
 // Session represents a user session stored in the database.
 type Session struct {
 	ID        string    `gorm:"primaryKey"`
-	UserID    int64     `gorm:"not null;index"`
+	UserID    string    `gorm:"not null;index"`
 	ExpiresAt time.Time `gorm:"not null;index"`
 	CreatedAt time.Time `gorm:"autoCreateTime"`
 }
@@ -39,7 +39,7 @@ func (s *Session) IsExpired() bool {
 
 // Store defines the interface for session storage operations.
 type Store interface {
-	Create(userID int64, duration time.Duration) (*Session, error)
+	Create(userID string, duration time.Duration) (*Session, error)
 	Get(sessionID string) (*Session, error)
 	Delete(sessionID string) error
 	DeleteExpired() error
@@ -68,7 +68,7 @@ func NewStore(db *gorm.DB, cleanupInterval time.Duration) *SQLiteStore {
 }
 
 // Create creates a new session with a cryptographically secure random ID.
-func (s *SQLiteStore) Create(userID int64, duration time.Duration) (*Session, error) {
+func (s *SQLiteStore) Create(userID string, duration time.Duration) (*Session, error) {
 	// Generate cryptographically secure random session ID (32 bytes)
 	sessionID, err := generateSessionID()
 	if err != nil {

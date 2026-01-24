@@ -1,10 +1,14 @@
 package common
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type AuditFields struct {
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
-	CreatedBy uint      `json:"createdBy"`
-	UpdatedBy uint      `json:"updatedBy"`
+	CreatedBy uuid.UUID `json:"createdBy"`
+	UpdatedBy uuid.UUID `json:"updatedBy"`
 }

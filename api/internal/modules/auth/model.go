@@ -1,10 +1,14 @@
 package auth
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 // User represents a user in the system.
 type User struct {
-	ID           uint      `gorm:"primarykey" json:"id"`
+	ID           uuid.UUID `gorm:"type:char(36);primarykey" json:"id"`
 	Email        string    `gorm:"uniqueIndex;not null" json:"email"`
 	PasswordHash string    `gorm:"column:password;not null" json:"-"` // Never expose password hash
 	Name         string    `gorm:"not null" json:"name"`
