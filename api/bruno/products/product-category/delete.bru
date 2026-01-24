@@ -1,8 +1,9 @@
 meta {
   name: Delete Product Category
   type: http
-  seq: 14
+  tags: [entity, product-category, regression]
 }
+
 
 delete {
   url: {{baseUrl}}/api/{{apiVersion}}/products/categories/{{testCategoryId}}
@@ -19,6 +20,11 @@ headers {
 }
 
 tests {
+  test("testCategoryId should be set", function() {
+    const testCategoryId = bru.getVar('testCategoryId');
+    expect(testCategoryId, 'testCategoryId not set. Run products/product-category/create.bru first.').to.be.ok;
+  });
+
   test("should return 204 No Content", function() {
     expect(res.getStatus()).to.equal(204);
   });

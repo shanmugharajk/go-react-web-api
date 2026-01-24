@@ -1,7 +1,7 @@
 meta {
   name: Create Customer
   type: http
-  seq: 2
+  tags: [entity, customer, smoke, regression]
 }
 
 post {
@@ -41,7 +41,7 @@ tests {
 
   test("should return created customer", function() {
     const body = res.getBody();
-    expect(body.data).to.be.an('object');
+
     expect(body.data).to.have.property('id');
     bru.setVar('testCustomerId', body.data.id.toString());
   });

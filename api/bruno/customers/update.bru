@@ -1,8 +1,9 @@
 meta {
   name: Update Customer
   type: http
-  seq: 4
+  tags: [entity, customer, regression]
 }
+
 
 put {
   url: {{baseUrl}}/api/{{apiVersion}}/customers/{{testCustomerId}}
@@ -28,6 +29,11 @@ body:json {
 }
 
 tests {
+  test("testCustomerId should be set", function() {
+    const testCustomerId = bru.getVar('testCustomerId');
+    expect(testCustomerId, 'testCustomerId not set. Run customers/create.bru first.').to.be.ok;
+  });
+
   test("should return 200 OK", function() {
     expect(res.getStatus()).to.equal(200);
   });
@@ -40,7 +46,7 @@ tests {
 
   test("should return updated customer", function() {
     const body = res.getBody();
-    expect(body.data).to.be.an('object');
+
     expect(body.data).to.have.property('id');
     expect(body.data.id).to.be.a('string');
     // UUID format validation

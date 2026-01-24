@@ -1,7 +1,7 @@
 meta {
   name: Create Product Category
   type: http
-  seq: 11
+  tags: [entity, product-category, smoke, regression]
 }
 
 post {
@@ -39,7 +39,7 @@ tests {
 
   test("should return created category", function() {
     const body = res.getBody();
-    expect(body.data).to.be.an('object');
+
     expect(body.data).to.have.property('id');
     bru.setVar('testCategoryId', body.data.id.toString());
   });

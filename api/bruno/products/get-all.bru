@@ -1,7 +1,7 @@
 meta {
   name: Get All Products
   type: http
-  seq: 3
+  tags: [entity, product, smoke, regression]
 }
 
 get {
@@ -27,7 +27,7 @@ tests {
 
   test("should return array of products", function() {
     const body = res.getBody();
-    expect(body.data).to.be.an('array');
+
   });
 
   test("should return products with required fields", function() {

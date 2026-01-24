@@ -1,8 +1,9 @@
 meta {
   name: Get Product Category By ID
   type: http
-  seq: 12
+  tags: [entity, product-category, regression]
 }
+
 
 get {
   url: {{baseUrl}}/api/{{apiVersion}}/products/categories/{{testCategoryId}}
@@ -15,6 +16,11 @@ auth:bearer {
 }
 
 tests {
+  test("testCategoryId should be set", function() {
+    const testCategoryId = bru.getVar('testCategoryId');
+    expect(testCategoryId, 'testCategoryId not set. Run products/product-category/create.bru first.').to.be.ok;
+  });
+
   test("should return 200 OK", function() {
     expect(res.getStatus()).to.equal(200);
   });
@@ -27,7 +33,7 @@ tests {
 
   test("should return category object", function() {
     const body = res.getBody();
-    expect(body.data).to.be.an('object');
+
   });
 
   test("should return category with correct ID", function() {

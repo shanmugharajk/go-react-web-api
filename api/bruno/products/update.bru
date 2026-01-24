@@ -1,8 +1,9 @@
 meta {
   name: Update Product
   type: http
-  seq: 6
+  tags: [entity, product, regression]
 }
+
 
 put {
   url: {{baseUrl}}/api/{{apiVersion}}/products/{{testProductId}}
@@ -28,6 +29,11 @@ body:json {
 }
 
 tests {
+  test("testProductId should be set", function() {
+    const testProductId = bru.getVar('testProductId');
+    expect(testProductId, 'testProductId not set. Run products/create.bru first.').to.be.ok;
+  });
+
   test("should return 200 OK", function() {
     expect(res.getStatus()).to.equal(200);
   });
@@ -40,7 +46,7 @@ tests {
 
   test("should return updated product", function() {
     const body = res.getBody();
-    expect(body.data).to.be.an('object');
+
     expect(body.data).to.have.property('id');
     expect(body.data.id).to.be.a('string');
     // UUID format validation

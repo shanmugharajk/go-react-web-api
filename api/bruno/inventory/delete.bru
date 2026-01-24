@@ -1,8 +1,9 @@
 meta {
   name: Delete Batch
   type: http
-  seq: 15
+  tags: [entity, inventory, regression]
 }
+
 
 delete {
   url: {{baseUrl}}/api/{{apiVersion}}/inventory/batches/{{testBatchId}}
@@ -19,6 +20,11 @@ headers {
 }
 
 tests {
+  test("testBatchId should be set", function() {
+    const testBatchId = bru.getVar('testBatchId');
+    expect(testBatchId, 'testBatchId not set. Run inventory/create.bru first.').to.be.ok;
+  });
+
   test("should return 204 No Content", function() {
     expect(res.getStatus()).to.equal(204);
   });

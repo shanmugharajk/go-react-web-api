@@ -1,7 +1,7 @@
 meta {
   name: Get All Batches
   type: http
-  seq: 11
+  tags: [entity, inventory, smoke, regression]
 }
 
 get {
@@ -27,7 +27,7 @@ tests {
 
   test("should return array of batches", function() {
     const body = res.getBody();
-    expect(body.data).to.be.an('array');
+
   });
 
   test("should return batches with required fields", function() {

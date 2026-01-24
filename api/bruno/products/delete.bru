@@ -1,8 +1,9 @@
 meta {
   name: Delete Product
   type: http
-  seq: 20
+  tags: [entity, product, regression]
 }
+
 
 delete {
   url: {{baseUrl}}/api/{{apiVersion}}/products/{{testProductId}}
@@ -19,6 +20,11 @@ headers {
 }
 
 tests {
+  test("testProductId should be set", function() {
+    const testProductId = bru.getVar('testProductId');
+    expect(testProductId, 'testProductId not set. Run products/create.bru first.').to.be.ok;
+  });
+
   test("should return 204 No Content", function() {
     expect(res.getStatus()).to.equal(204);
   });

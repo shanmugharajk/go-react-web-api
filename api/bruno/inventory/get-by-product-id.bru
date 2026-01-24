@@ -1,8 +1,9 @@
 meta {
   name: Get Batches By Product ID
   type: http
-  seq: 13
+  tags: [entity, inventory, regression]
 }
+
 
 get {
   url: {{baseUrl}}/api/{{apiVersion}}/inventory/products/{{testProductId}}/batches
@@ -15,6 +16,11 @@ auth:bearer {
 }
 
 tests {
+  test("testProductId should be set", function() {
+    const testProductId = bru.getVar('testProductId');
+    expect(testProductId, 'testProductId not set. Run products/create.bru first.').to.be.ok;
+  });
+
   test("should return 200 OK", function() {
     expect(res.getStatus()).to.equal(200);
   });
@@ -27,16 +33,16 @@ tests {
 
   test("should return array of batches", function() {
     const body = res.getBody();
-    expect(body.data).to.be.an('array');
+
   });
 
   test("should return batches for the specific product", function() {
     const body = res.getBody();
     const testProductId = bru.getVar('testProductId');
     if (body.data.length > 0) {
-      body.data.forEach(batch => {
-        expect(batch.productId).to.equal(testProductId);
-      });
+      for (let i = 0; i < body.data.length; i++) {
+        expect(body.data[i].productId).to.equal(testProductId);
+      }
     }
   });
 

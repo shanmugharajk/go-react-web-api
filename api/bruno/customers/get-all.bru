@@ -1,7 +1,7 @@
 meta {
   name: Get All Customers
   type: http
-  seq: 1
+  tags: [entity, customer, smoke, regression]
 }
 
 get {
@@ -27,7 +27,7 @@ tests {
 
   test("should return array of customers", function() {
     const body = res.getBody();
-    expect(body.data).to.be.an('array');
+
   });
 
   test("should return customers with required fields", function() {

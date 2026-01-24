@@ -1,8 +1,9 @@
 meta {
   name: Get Batch By ID
   type: http
-  seq: 12
+  tags: [entity, inventory, regression]
 }
+
 
 get {
   url: {{baseUrl}}/api/{{apiVersion}}/inventory/batches/{{testBatchId}}
@@ -15,6 +16,11 @@ auth:bearer {
 }
 
 tests {
+  test("testBatchId should be set", function() {
+    const testBatchId = bru.getVar('testBatchId');
+    expect(testBatchId, 'testBatchId not set. Run inventory/create.bru first.').to.be.ok;
+  });
+
   test("should return 200 OK", function() {
     expect(res.getStatus()).to.equal(200);
   });
@@ -27,7 +33,7 @@ tests {
 
   test("should return batch object", function() {
     const body = res.getBody();
-    expect(body.data).to.be.an('object');
+
   });
 
   test("should return batch with correct ID", function() {

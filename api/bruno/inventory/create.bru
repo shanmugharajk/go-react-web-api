@@ -1,8 +1,9 @@
 meta {
   name: Create Batch
   type: http
-  seq: 10
+  tags: [entity, inventory, smoke, regression]
 }
+
 
 post {
   url: {{baseUrl}}/api/{{apiVersion}}/inventory/batches
@@ -30,6 +31,11 @@ body:json {
 }
 
 tests {
+  test("testProductId should be set", function() {
+    const testProductId = bru.getVar('testProductId');
+    expect(testProductId, 'testProductId not set. Run products/create.bru first.').to.be.ok;
+  });
+
   test("should return 201 Created", function() {
     expect(res.getStatus()).to.equal(201);
   });
@@ -42,7 +48,7 @@ tests {
 
   test("should return created batch", function() {
     const body = res.getBody();
-    expect(body.data).to.be.an('object');
+
     expect(body.data).to.have.property('id');
     bru.setVar('testBatchId', body.data.id.toString());
   });

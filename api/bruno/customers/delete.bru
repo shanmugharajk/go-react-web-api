@@ -1,8 +1,9 @@
 meta {
   name: Delete Customer
   type: http
-  seq: 5
+  tags: [entity, customer, regression]
 }
+
 
 delete {
   url: {{baseUrl}}/api/{{apiVersion}}/customers/{{testCustomerId}}
@@ -19,6 +20,11 @@ headers {
 }
 
 tests {
+  test("testCustomerId should be set", function() {
+    const testCustomerId = bru.getVar('testCustomerId');
+    expect(testCustomerId, 'testCustomerId not set. Run customers/create.bru first.').to.be.ok;
+  });
+
   test("should return 204 No Content", function() {
     expect(res.getStatus()).to.equal(204);
   });

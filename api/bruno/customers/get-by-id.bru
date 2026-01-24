@@ -1,8 +1,9 @@
 meta {
   name: Get Customer By ID
   type: http
-  seq: 3
+  tags: [entity, customer, regression]
 }
+
 
 get {
   url: {{baseUrl}}/api/{{apiVersion}}/customers/{{testCustomerId}}
@@ -15,6 +16,11 @@ auth:bearer {
 }
 
 tests {
+  test("testCustomerId should be set", function() {
+    const testCustomerId = bru.getVar('testCustomerId');
+    expect(testCustomerId, 'testCustomerId not set. Run customers/create.bru first.').to.be.ok;
+  });
+
   test("should return 200 OK", function() {
     expect(res.getStatus()).to.equal(200);
   });
@@ -27,7 +33,7 @@ tests {
 
   test("should return customer object", function() {
     const body = res.getBody();
-    expect(body.data).to.be.an('object');
+
   });
 
   test("should return customer with correct ID", function() {

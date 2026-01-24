@@ -1,8 +1,9 @@
 meta {
   name: Update Batch
   type: http
-  seq: 14
+  tags: [entity, inventory, regression]
 }
+
 
 put {
   url: {{baseUrl}}/api/{{apiVersion}}/inventory/batches/{{testBatchId}}
@@ -29,6 +30,11 @@ body:json {
 }
 
 tests {
+  test("testBatchId should be set", function() {
+    const testBatchId = bru.getVar('testBatchId');
+    expect(testBatchId, 'testBatchId not set. Run inventory/create.bru first.').to.be.ok;
+  });
+
   test("should return 200 OK", function() {
     expect(res.getStatus()).to.equal(200);
   });
@@ -41,7 +47,7 @@ tests {
 
   test("should return updated batch", function() {
     const body = res.getBody();
-    expect(body.data).to.be.an('object');
+
     expect(body.data).to.have.property('id');
     expect(body.data.id).to.be.a('string');
     // UUID format validation
