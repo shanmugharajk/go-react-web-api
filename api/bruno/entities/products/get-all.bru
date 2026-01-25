@@ -1,0 +1,61 @@
+meta {
+  name: Get All Products
+  type: http
+  tags: [
+    entities
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/{{apiVersion}}/products
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+tests {
+  test("should return 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return array of products", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('array');
+  });
+
+  test("should return products with required fields", function() {
+    const body = res.getBody();
+    if (body.data.length > 0) {
+      const product = body.data[0];
+      expect(product).to.have.property('id');
+      expect(product).to.have.property('name');
+      expect(product).to.have.property('description');
+      expect(product).to.have.property('price');
+      expect(product).to.have.property('stock');
+      expect(product).to.have.property('categoryId');
+      expect(product).to.have.property('createdAt');
+      expect(product).to.have.property('updatedAt');
+      expect(product).to.have.property('createdBy');
+      expect(product).to.have.property('updatedBy');
+    }
+  });
+
+  test("should return products with valid UUIDs", function() {
+    const body = res.getBody();
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (body.data.length > 0) {
+      body.data.forEach(product => {
+        expect(product.id).to.match(uuidRegex);
+      });
+    }
+  });
+}

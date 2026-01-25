@@ -6,8 +6,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/db"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/errors"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/response"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/validator"
 )
@@ -113,11 +114,15 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 
 	customer, err := h.service.Update(id, req, user)
 	if err != nil {
+		if errors.IsNotFound(err) {
+			response.Error(w, http.StatusNotFound, "Customer not found")
+			return
+		}
 		if validator.IsValidationError(err) {
 			response.Error(w, http.StatusBadRequest, err.Error())
-		} else {
-			response.Error(w, http.StatusInternalServerError, "Failed to update customer")
+			return
 		}
+		response.Error(w, http.StatusInternalServerError, "Failed to update customer")
 		return
 	}
 
@@ -134,6 +139,10 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.service.Delete(id); err != nil {
+		if errors.IsNotFound(err) {
+			response.Error(w, http.StatusNotFound, "Customer not found")
+			return
+		}
 		response.Error(w, http.StatusInternalServerError, "Failed to delete customer")
 		return
 	}

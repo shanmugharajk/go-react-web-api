@@ -3,6 +3,8 @@ package errors
 import (
 	"errors"
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
 // Common application errors.
@@ -62,4 +64,13 @@ func Wrap(err error, message string) error {
 // Wrapf wraps an error with a formatted message.
 func Wrapf(err error, format string, args ...any) error {
 	return fmt.Errorf(fmt.Sprintf(format, args...)+": %w", err)
+}
+
+// IsNotFound checks if the error is a "not found" error.
+// This includes both our ErrNotFound and GORM's ErrRecordNotFound.
+func IsNotFound(err error) bool {
+	if err == nil {
+		return false
+	}
+	return errors.Is(err, ErrNotFound) || errors.Is(err, gorm.ErrRecordNotFound)
 }

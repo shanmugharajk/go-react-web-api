@@ -3,6 +3,7 @@ package product
 import (
 	"github.com/google/uuid"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/db"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/errors"
 )
 
 // ProductRepository handles data access for products.
@@ -48,7 +49,14 @@ func (r *ProductRepository) Update(product *Product) error {
 
 // Delete deletes a product by ID.
 func (r *ProductRepository) Delete(id uuid.UUID) error {
-	return r.db.Delete(&Product{}, id).Error
+	result := r.db.Delete(&Product{}, id)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.ErrNotFound
+	}
+	return nil
 }
 
 // CategoryRepository handles data access for product categories.
@@ -94,5 +102,12 @@ func (r *CategoryRepository) Update(category *ProductCategory) error {
 
 // Delete deletes a product category by ID.
 func (r *CategoryRepository) Delete(id uuid.UUID) error {
-	return r.db.Delete(&ProductCategory{}, id).Error
+	result := r.db.Delete(&ProductCategory{}, id)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.ErrNotFound
+	}
+	return nil
 }

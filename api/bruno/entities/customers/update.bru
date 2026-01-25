@@ -1,0 +1,113 @@
+meta {
+  name: Update Customer
+  type: http
+  tags: [
+    entities
+  ]
+}
+
+script:pre-request {
+  const customer = require('./scripts/customer.js')
+
+  const customerData = {
+    name: "Customer-to-Update",
+    email: "customer-to-update@example.com",
+    mobile: "9876543210",
+    balance: 50.00
+  }
+
+  const { id: customerId } = await customer.createCustomer(customerData)
+  bru.setVar('customerToUpdateId', customerId.toString());
+}
+
+script:post-response {
+  const customer = require('./scripts/customer.js')
+  const customerId = bru.getVar('customerToUpdateId');
+
+  if (customerId) {
+    await customer.deleteCustomer(customerId);
+  }
+}
+
+put {
+  url: {{baseUrl}}/api/{{apiVersion}}/customers/{{customerToUpdateId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "updated-customer@example.com",
+    "balance": 250.75,
+    "active": false
+  }
+}
+
+tests {
+  test("should return 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return updated customer object", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('object');
+  });
+
+  test("should return customer with same ID", function() {
+    const body = res.getBody();
+    expect(body.data.id).to.equal(bru.getVar('customerToUpdateId'));
+  });
+
+  test("should return customer with updated data", function() {
+    const body = res.getBody();
+    const customer = body.data;
+    expect(customer.email).to.equal("updated-customer@example.com");
+    expect(customer.balance).to.equal(250.75);
+    expect(customer.active).to.equal(false);
+  });
+
+  test("should NOT allow updating name and mobile", function() {
+    const body = res.getBody();
+    const customer = body.data;
+    // Name and mobile should remain unchanged
+    expect(customer.name).to.equal("Customer-to-Update");
+    expect(customer.mobile).to.equal("9876543210");
+  });
+
+  test("should return customer with required fields", function() {
+    const body = res.getBody();
+    const customer = body.data;
+    expect(customer).to.have.property('id');
+    expect(customer).to.have.property('name');
+    expect(customer).to.have.property('email');
+    expect(customer).to.have.property('mobile');
+    expect(customer).to.have.property('balance');
+    expect(customer).to.have.property('active');
+    expect(customer).to.have.property('createdAt');
+    expect(customer).to.have.property('updatedAt');
+    expect(customer).to.have.property('createdBy');
+    expect(customer).to.have.property('updatedBy');
+  });
+
+  test("should have updatedAt later than createdAt", function() {
+    const body = res.getBody();
+    const customer = body.data;
+    const createdAt = new Date(customer.createdAt);
+    const updatedAt = new Date(customer.updatedAt);
+    expect(updatedAt.getTime()).to.be.at.least(createdAt.getTime());
+  });
+}

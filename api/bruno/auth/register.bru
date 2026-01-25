@@ -1,0 +1,78 @@
+meta {
+  name: Register (JWT Token)
+  type: http
+  tags: [
+    auth
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/{{apiVersion}}/auth/token/register
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "email": "{{testUserEmail}}",
+    "password": "{{testUserPassword}}",
+    "name": "{{testUserName}}"
+  }
+}
+
+tests {
+  test("should return 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return JWT token", function() {
+    const body = res.getBody();
+    expect(body.data).to.have.property('accessToken');
+    expect(body.data.accessToken).to.be.a('string');
+    expect(body.data.accessToken.split('.')).to.have.lengthOf(3);
+    bru.setVar('jwt_token', body.data.accessToken);
+  });
+
+  test("should return token type Bearer", function() {
+    const body = res.getBody();
+    expect(body.data).to.have.property('tokenType');
+    expect(body.data.tokenType).to.equal('Bearer');
+  });
+
+  test("should return expiration time", function() {
+    const body = res.getBody();
+    expect(body.data).to.have.property('expiresIn');
+    expect(body.data.expiresIn).to.be.a('number');
+    expect(body.data.expiresIn).to.be.above(0);
+  });
+
+  test("should return newly created user info", function() {
+    const body = res.getBody();
+    expect(body.data).to.have.property('user');
+    expect(body.data.user).to.have.property('id');
+    expect(body.data.user).to.have.property('email');
+    expect(body.data.user.email).to.equal('newtokenuser@example.com');
+    expect(body.data.user).to.have.property('name');
+    expect(body.data.user.name).to.equal('New Token User');
+  });
+
+  test("should not expose password", function() {
+    const body = res.getBody();
+    expect(body.data.user).to.not.have.property('password');
+  });
+
+  test("should have createdAt timestamp", function() {
+    const body = res.getBody();
+    expect(body.data.user).to.have.property('createdAt');
+  });
+}

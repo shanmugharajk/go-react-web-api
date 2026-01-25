@@ -1,0 +1,28 @@
+meta {
+  name: products test
+}
+
+script:pre-request {
+  const product = require('./scripts/product.js')
+
+  const productCategoryData = {
+    name: "Bikes",
+    description: "A category for bikes"
+  }
+
+  await product.createProductCategory(productCategoryData)
+
+  const { id: testProductCategoryId } = bru.getVar('Bikes')
+  bru.setVar('testProductCategoryId', testProductCategoryId.toString())
+
+  const productData = {
+    name: "Honda-CBR-500R",
+    description: "A bike for API testing",
+    price: 29.99,
+    stock: 100,
+    categoryId: testProductCategoryId.toString()
+  }
+
+  const { id: productId } = await product.createProduct(productData)
+  bru.setVar('testProductId', productId.toString())
+}

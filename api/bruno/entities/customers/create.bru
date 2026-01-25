@@ -1,0 +1,90 @@
+meta {
+  name: Create Customer
+  type: http
+  tags: [
+    entities
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/{{apiVersion}}/customers
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Test Customer",
+    "email": "testcustomer@example.com",
+    "mobile": "1234567890",
+    "balance": 100.50
+  }
+}
+
+tests {
+  test("should return 201 Created", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return created customer object", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('object');
+  });
+
+  test("should return customer with valid UUID", function() {
+    const body = res.getBody();
+    expect(body.data).to.have.property('id');
+    expect(body.data.id).to.be.a('string');
+    // UUID format validation
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    expect(body.data.id).to.match(uuidRegex);
+  });
+
+  test("should return customer with correct data", function() {
+    const body = res.getBody();
+    const customer = body.data;
+    expect(customer.name).to.equal("Test Customer");
+    expect(customer.email).to.equal("testcustomer@example.com");
+    expect(customer.mobile).to.equal("1234567890");
+    expect(customer.balance).to.equal(100.50);
+  });
+
+  test("should return customer with required fields", function() {
+    const body = res.getBody();
+    const customer = body.data;
+    expect(customer).to.have.property('id');
+    expect(customer).to.have.property('name');
+    expect(customer).to.have.property('email');
+    expect(customer).to.have.property('mobile');
+    expect(customer).to.have.property('balance');
+    expect(customer).to.have.property('active');
+    expect(customer).to.have.property('createdAt');
+    expect(customer).to.have.property('updatedAt');
+    expect(customer).to.have.property('createdBy');
+    expect(customer).to.have.property('updatedBy');
+  });
+
+  test("should have active status true by default", function() {
+    const body = res.getBody();
+    expect(body.data.active).to.equal(true);
+  });
+
+  test("should set testCustomerId for other tests", function() {
+    const body = res.getBody();
+    bru.setVar('testCustomerId', body.data.id);
+  });
+}

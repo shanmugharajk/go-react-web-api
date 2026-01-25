@@ -1,0 +1,76 @@
+meta {
+  name: Get Product Category By ID
+  type: http
+  tags: [
+    entities
+  ]
+}
+
+script:pre-request {
+  const product = require('./scripts/product.js')
+
+  const categoryData = {
+    name: "Category-For-GetById",
+    description: "A category for get by ID testing"
+  }
+
+  await product.createProductCategory(categoryData)
+
+  const { id: categoryId } = bru.getVar('Category-For-GetById')
+  bru.setVar('categoryToGetId', categoryId.toString())
+}
+
+script:post-response {
+  const product = require('./scripts/product.js')
+  const categoryId = bru.getVar('categoryToGetId');
+
+  if (categoryId) {
+    await product.deleteProductCategory(categoryId);
+  }
+}
+
+get {
+  url: {{baseUrl}}/api/{{apiVersion}}/products/categories/{{categoryToGetId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+tests {
+  test("should return 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return category object", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('object');
+  });
+
+  test("should return category with correct ID", function() {
+    const body = res.getBody();
+    expect(body.data).to.have.property('id');
+    expect(body.data.id).to.be.a('string');
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    expect(body.data.id).to.match(uuidRegex);
+  });
+
+  test("should return category with required fields", function() {
+    const body = res.getBody();
+    const category = body.data;
+    expect(category).to.have.property('name');
+    expect(category).to.have.property('description');
+    expect(category).to.have.property('createdAt');
+    expect(category).to.have.property('updatedAt');
+    expect(category).to.have.property('createdBy');
+    expect(category).to.have.property('updatedBy');
+  });
+}

@@ -1,0 +1,8 @@
+meta {
+  name: entities test
+}
+
+script:pre-request {
+  const auth = require('./scripts/auth.js')
+  await auth.register()
+}

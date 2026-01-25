@@ -1,0 +1,85 @@
+meta {
+  name: Create Product
+  type: http
+  tags: [
+    entities
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/{{apiVersion}}/products
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Test Product",
+    "description": "A test product for API testing",
+    "price": 49.99,
+    "stock": 150,
+    "categoryId": "{{testProductCategoryId}}"
+  }
+}
+
+tests {
+  test("should return 201 Created", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return created product object", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('object');
+  });
+
+  test("should return product with valid UUID", function() {
+    const body = res.getBody();
+    expect(body.data).to.have.property('id');
+    expect(body.data.id).to.be.a('string');
+    // UUID format validation
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    expect(body.data.id).to.match(uuidRegex);
+  });
+
+  test("should return product with correct data", function() {
+    const body = res.getBody();
+    const product = body.data;
+    expect(product.name).to.equal("Test Product");
+    expect(product.description).to.equal("A test product for API testing");
+    expect(product.price).to.equal(49.99);
+    expect(product.stock).to.equal(150);
+  });
+
+  test("should return product with required fields", function() {
+    const body = res.getBody();
+    const product = body.data;
+    expect(product).to.have.property('name');
+    expect(product).to.have.property('description');
+    expect(product).to.have.property('price');
+    expect(product).to.have.property('stock');
+    expect(product).to.have.property('categoryId');
+    expect(product).to.have.property('createdAt');
+    expect(product).to.have.property('updatedAt');
+    expect(product).to.have.property('createdBy');
+    expect(product).to.have.property('updatedBy');
+  });
+
+  test("should set testProductId for other tests", function() {
+    const body = res.getBody();
+    bru.setVar('testProductId', body.data.id);
+  });
+}

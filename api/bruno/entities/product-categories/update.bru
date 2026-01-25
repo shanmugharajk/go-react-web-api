@@ -1,0 +1,99 @@
+meta {
+  name: Update Product Category
+  type: http
+  tags: [
+    entities
+  ]
+}
+
+script:pre-request {
+  const product = require('./scripts/product.js')
+
+  const categoryData = {
+    name: "Category-To-Update",
+    description: "A category for update testing"
+  }
+
+  await product.createProductCategory(categoryData)
+
+  const { id: categoryId } = bru.getVar('Category-To-Update')
+  bru.setVar('categoryToUpdateId', categoryId.toString())
+}
+
+script:post-response {
+  const product = require('./scripts/product.js')
+  const categoryId = bru.getVar('categoryToUpdateId');
+
+  if (categoryId) {
+    await product.deleteProductCategory(categoryId);
+  }
+}
+
+put {
+  url: {{baseUrl}}/api/{{apiVersion}}/products/categories/{{categoryToUpdateId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Updated Category Name",
+    "description": "Updated category description"
+  }
+}
+
+tests {
+  test("should return 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return updated category object", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('object');
+  });
+
+  test("should return category with same ID", function() {
+    const body = res.getBody();
+    expect(body.data.id).to.equal(bru.getVar('categoryToUpdateId'));
+  });
+
+  test("should return category with updated data", function() {
+    const body = res.getBody();
+    const category = body.data;
+    expect(category.name).to.equal("Updated Category Name");
+    expect(category.description).to.equal("Updated category description");
+  });
+
+  test("should return category with required fields", function() {
+    const body = res.getBody();
+    const category = body.data;
+    expect(category).to.have.property('name');
+    expect(category).to.have.property('description');
+    expect(category).to.have.property('createdAt');
+    expect(category).to.have.property('updatedAt');
+    expect(category).to.have.property('createdBy');
+    expect(category).to.have.property('updatedBy');
+  });
+
+  test("should have updatedAt later than createdAt", function() {
+    const body = res.getBody();
+    const category = body.data;
+    const createdAt = new Date(category.createdAt);
+    const updatedAt = new Date(category.updatedAt);
+    expect(updatedAt.getTime()).to.be.at.least(createdAt.getTime());
+  });
+}

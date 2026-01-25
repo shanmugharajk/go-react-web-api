@@ -1,0 +1,35 @@
+meta {
+  name: Get Customer By ID (Not Found)
+  type: http
+  tags: [
+    entities
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/{{apiVersion}}/customers/00000000-0000-0000-0000-000000000001
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+tests {
+  test("should return 404 Not Found", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+
+  test("should return error response", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(false);
+  });
+
+  test("should return error message", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('error');
+    expect(body.error).to.be.a('string');
+  });
+}

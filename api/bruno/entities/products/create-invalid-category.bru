@@ -1,0 +1,50 @@
+meta {
+  name: Create Product (Invalid Category)
+  type: http
+  tags: [
+    entities
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/{{apiVersion}}/products
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Product with Invalid Category",
+    "description": "A product with non-existent category",
+    "price": 49.99,
+    "stock": 50,
+    "categoryId": "00000000-0000-0000-0000-000000000001"
+  }
+}
+
+tests {
+  test("should return 500 Internal Server Error (FK violation)", function() {
+    expect(res.getStatus()).to.equal(500);
+  });
+
+  test("should return error response", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(false);
+  });
+
+  test("should return error message", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('error');
+    expect(body.error).to.be.a('string');
+  });
+}
+

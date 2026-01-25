@@ -1,0 +1,44 @@
+meta {
+  name: Delete Product
+  type: http
+  tags: [
+    entities
+  ]
+}
+
+script:pre-request {
+  const product = require('./scripts/product.js')
+
+  const productData = {
+    name: "Test",
+    description: "A test product for API testing",
+    price: 29.99,
+    stock: 100,
+    categoryId: bru.getVar('testProductCategoryId')
+  }
+
+  const { id: productId } = await product.createProduct(productData)
+  bru.setVar('idToDelete', productId.toString());
+}
+
+delete {
+  url: {{baseUrl}}/api/{{apiVersion}}/products/{{idToDelete}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+
+tests {
+  test("should return 204 No Content", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+
+  test("should return empty response body", function() {
+    const body = res.getBody();
+    expect(body).to.be.empty;
+  });
+}

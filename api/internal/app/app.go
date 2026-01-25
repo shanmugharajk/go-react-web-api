@@ -43,12 +43,17 @@ func New() (*App, error) {
 		return nil, fmt.Errorf("failed to initialize database: %w", err)
 	}
 
-	// Auto-migrate models
+	// Auto-migrate models (order matters for FK constraints)
 	if err := database.AutoMigrate(
 		&auth.User{},
-		&product.Product{},
 		&product.ProductCategory{},
 		&customer.Customer{},
+	); err != nil {
+		return nil, fmt.Errorf("failed to run auto-migrations: %w", err)
+	}
+
+	if err := database.AutoMigrate(
+		&product.Product{},
 	); err != nil {
 		return nil, fmt.Errorf("failed to run auto-migrations: %w", err)
 	}

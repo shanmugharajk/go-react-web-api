@@ -1,0 +1,43 @@
+meta {
+  name: Delete Customer
+  type: http
+  tags: [
+    entities
+  ]
+}
+
+script:pre-request {
+  const customer = require('./scripts/customer.js')
+
+  const customerData = {
+    name: "Customer-to-Delete",
+    email: "customer-to-delete@example.com",
+    mobile: "5551234567",
+    balance: 0
+  }
+
+  const { id: customerId } = await customer.createCustomer(customerData)
+  bru.setVar('idToDelete', customerId.toString());
+}
+
+delete {
+  url: {{baseUrl}}/api/{{apiVersion}}/customers/{{idToDelete}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+
+tests {
+  test("should return 204 No Content", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+
+  test("should return empty response body", function() {
+    const body = res.getBody();
+    expect(body).to.be.empty;
+  });
+}

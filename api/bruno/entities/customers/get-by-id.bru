@@ -1,0 +1,54 @@
+meta {
+  name: Get Customer By ID
+  type: http
+  tags: [
+    entities
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/{{apiVersion}}/customers/{{testCustomerId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+tests {
+  test("should return 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return customer object", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('object');
+  });
+
+  test("should return customer with correct ID", function() {
+    const body = res.getBody();
+    expect(body.data.id).to.equal(bru.getVar('testCustomerId'));
+  });
+
+  test("should return customer with required fields", function() {
+    const body = res.getBody();
+    const customer = body.data;
+    expect(customer).to.have.property('id');
+    expect(customer).to.have.property('name');
+    expect(customer).to.have.property('email');
+    expect(customer).to.have.property('mobile');
+    expect(customer).to.have.property('balance');
+    expect(customer).to.have.property('active');
+    expect(customer).to.have.property('createdAt');
+    expect(customer).to.have.property('updatedAt');
+    expect(customer).to.have.property('createdBy');
+    expect(customer).to.have.property('updatedBy');
+  });
+}

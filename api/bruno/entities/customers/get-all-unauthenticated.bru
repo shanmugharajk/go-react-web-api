@@ -1,0 +1,31 @@
+meta {
+  name: Get All Customers (Unauthenticated)
+  type: http
+  tags: [
+    entities
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/{{apiVersion}}/customers
+  body: none
+  auth: none
+}
+
+tests {
+  test("should return 401 Unauthorized", function() {
+    expect(res.getStatus()).to.equal(401);
+  });
+
+  test("should return error response", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(false);
+  });
+
+  test("should return error message", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('error');
+    expect(body.error).to.be.a('string');
+  });
+}

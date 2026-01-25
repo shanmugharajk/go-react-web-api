@@ -3,6 +3,7 @@ package customer
 import (
 	"github.com/google/uuid"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/db"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/errors"
 )
 
 // CustomerRepository handles database operations for customers.
@@ -48,5 +49,12 @@ func (r *CustomerRepository) Update(customer *Customer) error {
 
 // Delete soft deletes a customer by setting active to false.
 func (r *CustomerRepository) Delete(id uuid.UUID) error {
-	return r.db.Model(&Customer{}).Where("id = ?", id).Update("active", false).Error
+	result := r.db.Model(&Customer{}).Where("id = ?", id).Update("active", false)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.ErrNotFound
+	}
+	return nil
 }

@@ -1,0 +1,108 @@
+meta {
+  name: Update Product
+  type: http
+  tags: [
+    entities
+  ]
+}
+
+script:pre-request {
+  const product = require('./scripts/product.js')
+
+  const productData = {
+    name: "Product-to-Update",
+    description: "A test product for update testing",
+    price: 29.99,
+    stock: 75,
+    categoryId: bru.getVar('testProductCategoryId')
+  }
+
+  const { id: productId } = await product.createProduct(productData)
+  bru.setVar('productToUpdateId', productId.toString());
+}
+
+script:post-response {
+  const product = require('./scripts/product.js')
+  const productId = bru.getVar('productToUpdateId');
+
+  if (productId) {
+    await product.deleteProduct(productId);
+  }
+}
+
+put {
+  url: {{baseUrl}}/api/{{apiVersion}}/products/{{productToUpdateId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Updated-Product-Name",
+    "description": "Updated-product-description",
+    "price": 79.99,
+    "stock": 250,
+    "categoryId": "{{testProductCategoryId}}"
+  }
+}
+
+tests {
+  test("should return 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return updated product object", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('object');
+  });
+
+  test("should return product with same ID", function() {
+    const body = res.getBody();
+    expect(body.data.id).to.equal(bru.getVar('productToUpdateId'));
+  });
+
+  test("should return product with updated data", function() {
+    const body = res.getBody();
+    const product = body.data;
+    expect(product.name).to.equal("Updated-Product-Name");
+    expect(product.description).to.equal("Updated-product-description");
+    expect(product.price).to.equal(79.99);
+    expect(product.stock).to.equal(250);
+  });
+
+  test("should return product with required fields", function() {
+    const body = res.getBody();
+    const product = body.data;
+    expect(product).to.have.property('name');
+    expect(product).to.have.property('description');
+    expect(product).to.have.property('price');
+    expect(product).to.have.property('stock');
+    expect(product).to.have.property('categoryId');
+    expect(product).to.have.property('createdAt');
+    expect(product).to.have.property('updatedAt');
+    expect(product).to.have.property('createdBy');
+    expect(product).to.have.property('updatedBy');
+  });
+
+  test("should have updatedAt later than createdAt", function() {
+    const body = res.getBody();
+    const product = body.data;
+    const createdAt = new Date(product.createdAt);
+    const updatedAt = new Date(product.updatedAt);
+    expect(updatedAt.getTime()).to.be.at.least(createdAt.getTime());
+  });
+}

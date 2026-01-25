@@ -1,0 +1,49 @@
+meta {
+  name: Update Product (Not Found)
+  type: http
+  tags: [
+    entities
+  ]
+}
+
+put {
+  url: {{baseUrl}}/api/{{apiVersion}}/products/00000000-0000-0000-0000-000000000001
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "Updated Name",
+    "description": "Updated description",
+    "price": 99.99,
+    "stock": 500,
+    "categoryId": "{{testProductCategoryId}}"
+  }
+}
+
+tests {
+  test("should return 404 Not Found", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+
+  test("should return error response", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(false);
+  });
+
+  test("should return error message", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('error');
+    expect(body.error).to.be.a('string');
+  });
+}

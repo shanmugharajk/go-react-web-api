@@ -1,0 +1,42 @@
+meta {
+  name: Delete Product Category
+  type: http
+  tags: [
+    entities
+  ]
+}
+
+script:pre-request {
+  const product = require('./scripts/product.js')
+
+  const categoryData = {
+    name: "Category-To-Delete",
+    description: "A category for delete testing"
+  }
+
+  await product.createProductCategory(categoryData)
+
+  const { id: categoryId } = bru.getVar('Category-To-Delete')
+  bru.setVar('categoryToDeleteId', categoryId.toString())
+}
+
+delete {
+  url: {{baseUrl}}/api/{{apiVersion}}/products/categories/{{categoryToDeleteId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+tests {
+  test("should return 204 No Content", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+
+  test("should return empty response body", function() {
+    const body = res.getBody();
+    expect(body).to.be.empty;
+  });
+}

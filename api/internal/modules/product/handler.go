@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/db"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/errors"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/response"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/validator"
 )
@@ -114,6 +115,10 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 
 	product, err := h.service.Update(id, req, user)
 	if err != nil {
+		if errors.IsNotFound(err) {
+			response.Error(w, http.StatusNotFound, "product not found")
+			return
+		}
 		if validator.IsValidationError(err) {
 			response.Error(w, http.StatusBadRequest, err.Error())
 			return
@@ -141,6 +146,10 @@ func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.service.Delete(id, user); err != nil {
+		if errors.IsNotFound(err) {
+			response.Error(w, http.StatusNotFound, "product not found")
+			return
+		}
 		response.Error(w, http.StatusInternalServerError, "failed to delete product")
 		return
 	}
@@ -250,6 +259,10 @@ func (h *CategoryHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	category, err := h.service.Update(id, req, user)
 	if err != nil {
+		if errors.IsNotFound(err) {
+			response.Error(w, http.StatusNotFound, "product category not found")
+			return
+		}
 		if validator.IsValidationError(err) {
 			response.Error(w, http.StatusBadRequest, err.Error())
 			return
@@ -277,6 +290,10 @@ func (h *CategoryHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.service.Delete(id, user); err != nil {
+		if errors.IsNotFound(err) {
+			response.Error(w, http.StatusNotFound, "product category not found")
+			return
+		}
 		response.Error(w, http.StatusInternalServerError, "failed to delete product category")
 		return
 	}

@@ -1,0 +1,43 @@
+meta {
+  name: Update Product Category (Unauthenticated)
+  type: http
+  tags: [
+    entities
+  ]
+}
+
+put {
+  url: {{baseUrl}}/api/{{apiVersion}}/products/categories/00000000-0000-0000-0000-000000000001
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer invalid_token
+}
+
+body:json {
+  {
+    "name": "Updated Category Name",
+    "description": "Updated description"
+  }
+}
+
+tests {
+  test("should return 401 Unauthorized", function() {
+    expect(res.getStatus()).to.equal(401);
+  });
+
+  test("should return error response", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(false);
+  });
+
+  test("should return error message", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('error');
+    expect(body.error).to.be.a('string');
+  });
+}
