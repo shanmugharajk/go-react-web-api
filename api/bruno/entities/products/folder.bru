@@ -3,26 +3,29 @@ meta {
 }
 
 script:pre-request {
+  // Folder-level fixture setup: creates shared product category and product
+  // These are cached and reused across all tests in this folder
+  // Note: Cleanup is NOT done here - these fixtures persist for the entire test run
+  // Individual tests handle their own cleanup for data they create
+
   const product = require('./scripts/product.js')
 
   const productCategoryData = {
-    name: "Bikes",
-    description: "A category for bikes"
+    name: "entities.product.folder.productCategory",
+    description: "A category for create testing - entities.product.folder.productCategory"
   }
 
-  await product.createProductCategory(productCategoryData)
-
-  const { id: testProductCategoryId } = bru.getVar('Bikes')
-  bru.setVar('testProductCategoryId', testProductCategoryId.toString())
+  const productCategoryResult = await product.createProductCategory(productCategoryData)
+  bru.setVar('entities.product.folder.productCategoryId', productCategoryResult.id.toString())
 
   const productData = {
-    name: "Honda-CBR-500R",
-    description: "A bike for API testing",
+    name: "entities.product.folder.product",
+    description: "A product for create testing - entities.product.folder.product",
     price: 29.99,
     stock: 100,
-    categoryId: testProductCategoryId.toString()
+    categoryId: productCategoryResult.id
   }
 
-  const { id: productId } = await product.createProduct(productData)
-  bru.setVar('testProductId', productId.toString())
+  const productResult = await product.createProduct(productData)
+  bru.setVar('entities.product.folder.productId', productResult.id.toString())
 }

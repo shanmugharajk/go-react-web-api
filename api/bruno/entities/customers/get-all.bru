@@ -3,6 +3,7 @@ meta {
   type: http
   tags: [
     entities
+    customers
   ]
 }
 
@@ -50,11 +51,12 @@ tests {
   });
 
   test("should return customers with valid UUIDs", function() {
+    const { isValidUUID } = require('./scripts/utils');
     const body = res.getBody();
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    if (body.data.length > 0) {
+
+    if (body.data && body.data.length > 0) {
       body.data.forEach(customer => {
-        expect(customer.id).to.match(uuidRegex);
+        expect(isValidUUID(customer.id)).to.be.true;
       });
     }
   });

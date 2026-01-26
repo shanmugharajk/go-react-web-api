@@ -3,6 +3,7 @@ meta {
   type: http
   tags: [
     entities
+    customers
   ]
 }
 
@@ -10,18 +11,18 @@ script:pre-request {
   const customer = require('./scripts/customer.js')
 
   const customerData = {
-    name: "Customer-to-Delete",
-    email: "customer-to-delete@example.com",
+    name: "entities.customer.delete",
+    email: "entities.customer.delete@example.com",
     mobile: "5551234567",
     balance: 0
   }
 
   const { id: customerId } = await customer.createCustomer(customerData)
-  bru.setVar('idToDelete', customerId.toString());
+  bru.setVar('entities.customer.delete.id', customerId.toString());
 }
 
 delete {
-  url: {{baseUrl}}/api/{{apiVersion}}/customers/{{idToDelete}}
+  url: {{baseUrl}}/api/{{apiVersion}}/customers/{{entities.customer.delete.id}}
   body: none
   auth: bearer
 }

@@ -3,11 +3,12 @@ meta {
   type: http
   tags: [
     entities
+    products
   ]
 }
 
 put {
-  url: {{baseUrl}}/api/{{apiVersion}}/products/{{testProductId}}
+  url: {{baseUrl}}/api/{{apiVersion}}/products/{{entities.product.folder.productId}}
   body: json
   auth: none
 }
@@ -23,7 +24,7 @@ body:json {
     "description": "Updated description",
     "price": 99.99,
     "stock": 200,
-    "categoryId": "{{testProductCategoryId}}"
+    "categoryId": "{{entities.product.folder.productCategoryId}}"
   }
 }
 

@@ -3,6 +3,7 @@ meta {
   type: http
   tags: [
     entities
+    product-categories
   ]
 }
 
@@ -10,19 +11,17 @@ script:pre-request {
   const product = require('./scripts/product.js')
 
   const categoryData = {
-    name: "Category-To-Update",
-    description: "A category for update testing"
+    name: "entities.product-category.update",
+    description: "A category for update testing - entities.product-category.update"
   }
 
-  await product.createProductCategory(categoryData)
-
-  const { id: categoryId } = bru.getVar('Category-To-Update')
-  bru.setVar('categoryToUpdateId', categoryId.toString())
+  const { id: categoryId } = await product.createProductCategory(categoryData)
+  bru.setVar('entities.product-category.update.id', categoryId.toString());
 }
 
 script:post-response {
   const product = require('./scripts/product.js')
-  const categoryId = bru.getVar('categoryToUpdateId');
+  const categoryId = bru.getVar('entities.product-category.update.id');
 
   if (categoryId) {
     await product.deleteProductCategory(categoryId);
@@ -30,7 +29,7 @@ script:post-response {
 }
 
 put {
-  url: {{baseUrl}}/api/{{apiVersion}}/products/categories/{{categoryToUpdateId}}
+  url: {{baseUrl}}/api/{{apiVersion}}/products/categories/{{entities.product-category.update.id}}
   body: json
   auth: bearer
 }
@@ -45,8 +44,8 @@ headers {
 
 body:json {
   {
-    "name": "Updated Category Name",
-    "description": "Updated category description"
+    "name": "entities.product-category.update",
+    "description": "Updated category description - entities.product-category.update"
   }
 }
 
@@ -68,14 +67,14 @@ tests {
 
   test("should return category with same ID", function() {
     const body = res.getBody();
-    expect(body.data.id).to.equal(bru.getVar('categoryToUpdateId'));
+    expect(body.data.id).to.equal(bru.getVar('entities.product-category.update.id'));
   });
 
   test("should return category with updated data", function() {
     const body = res.getBody();
     const category = body.data;
-    expect(category.name).to.equal("Updated Category Name");
-    expect(category.description).to.equal("Updated category description");
+    expect(category.name).to.equal("entities.product-category.update");
+    expect(category.description).to.equal("Updated category description - entities.product-category.update");
   });
 
   test("should return category with required fields", function() {

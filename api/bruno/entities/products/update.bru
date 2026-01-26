@@ -3,6 +3,7 @@ meta {
   type: http
   tags: [
     entities
+    products
   ]
 }
 
@@ -10,19 +11,19 @@ script:pre-request {
   const product = require('./scripts/product.js')
 
   const productData = {
-    name: "Product-to-Update",
-    description: "A test product for update testing",
+    name: "entities.product.update",
+    description: "A product for update testing - entities.product.update",
     isActive: true,
-    categoryId: bru.getVar('testProductCategoryId')
+    categoryId: bru.getVar('entities.product.folder.productCategoryId')
   }
 
-  const { id: productId } = await product.createProduct(productData)
-  bru.setVar('productToUpdateId', productId.toString());
+  const result = await product.createProduct(productData)
+  bru.setVar('entities.product.update.id', result.id.toString());
 }
 
 script:post-response {
   const product = require('./scripts/product.js')
-  const productId = bru.getVar('productToUpdateId');
+  const productId = bru.getVar('entities.product.update.id');
 
   if (productId) {
     await product.deleteProduct(productId);
@@ -30,7 +31,7 @@ script:post-response {
 }
 
 put {
-  url: {{baseUrl}}/api/{{apiVersion}}/products/{{productToUpdateId}}
+  url: {{baseUrl}}/api/{{apiVersion}}/products/{{entities.product.update.id}}
   body: json
   auth: bearer
 }
@@ -45,10 +46,10 @@ headers {
 
 body:json {
   {
-    "name": "Updated-Product-Name",
-    "description": "Updated-product-description",
+    "name": "entities.product.update",
+    "description": "Updated product description - entities.product.update",
     "isActive": false,
-    "categoryId": "{{testProductCategoryId}}"
+    "categoryId": "{{entities.product.folder.productCategoryId}}"
   }
 }
 
@@ -70,14 +71,14 @@ tests {
 
   test("should return product with same ID", function() {
     const body = res.getBody();
-    expect(body.data.id).to.equal(bru.getVar('productToUpdateId'));
+    expect(body.data.id).to.equal(bru.getVar('entities.product.update.id'));
   });
 
   test("should return product with updated data", function() {
     const body = res.getBody();
     const product = body.data;
-    expect(product.name).to.equal("Updated-Product-Name");
-    expect(product.description).to.equal("Updated-product-description");
+    expect(product.name).to.equal("entities.product.update");
+    expect(product.description).to.equal("Updated product description - entities.product.update");
     expect(product.isActive).to.equal(false);
   });
 

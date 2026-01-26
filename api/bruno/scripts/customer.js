@@ -7,8 +7,6 @@ const createCustomer = async (data) => {
     return cachedCustomer
   }
 
-  console.log("📂 Creating customer...")
-
   try {
     const result = await bru.sendRequest({
       url: `${baseUrl}/api/${apiVersion}/customers`,
@@ -25,7 +23,6 @@ const createCustomer = async (data) => {
     }
 
     bru.setVar(data.name, result.data.data)
-    console.log("✅ Customer created successfully")
 
     return result.data.data
   } catch (error) {
@@ -40,8 +37,6 @@ const deleteCustomer = async (customerId) => {
     return
   }
 
-  console.log("🧹 Deleting customer...")
-
   try {
     await bru.sendRequest({
       url: `${baseUrl}/api/${apiVersion}/customers/${customerId}`,
@@ -51,7 +46,7 @@ const deleteCustomer = async (customerId) => {
       }
     })
 
-    console.log("✅ Customer deleted successfully")
+    bru.deleteVar(customerId)
   } catch (error) {
     console.error("❌ Customer deletion failed:", error.message)
     throw error

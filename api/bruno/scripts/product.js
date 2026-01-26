@@ -7,8 +7,6 @@ const createProductCategory = async (data) => {
     return cachedCategory
   }
 
-  console.log("📂 Creating product category...")
-
   try {
     const result = await bru.sendRequest({
       url: `${baseUrl}/api/${apiVersion}/products/categories`,
@@ -25,7 +23,6 @@ const createProductCategory = async (data) => {
     }
 
     bru.setVar(data.name, result.data.data)
-    console.log("✅ Product category created successfully")
 
     return result.data.data
   } catch (error) {
@@ -39,8 +36,6 @@ const createProduct = async (data) => {
   if (cachedProduct) {
     return cachedProduct
   }
-
-  console.log("📂 Creating product...")
 
   try {
     const result = await bru.sendRequest({
@@ -58,7 +53,6 @@ const createProduct = async (data) => {
     }
 
     bru.setVar(data.name, result.data.data)
-    console.log("✅ Product created successfully")
 
     return result.data.data
   } catch (error) {
@@ -73,8 +67,6 @@ const deleteProduct = async (productId) => {
     return
   }
 
-  console.log("🧹 Deleting product...")
-
   try {
     await bru.sendRequest({
       url: `${baseUrl}/api/${apiVersion}/products/${productId}`,
@@ -84,7 +76,7 @@ const deleteProduct = async (productId) => {
       }
     })
 
-    console.log("✅ Product deleted successfully")
+    bru.deleteVar(productId)
   } catch (error) {
     console.error("❌ Product deletion failed:", error.message)
     throw error
@@ -97,8 +89,6 @@ const deleteProductCategory = async (categoryId) => {
     return
   }
 
-  console.log("🧹 Deleting product category...")
-
   try {
     await bru.sendRequest({
       url: `${baseUrl}/api/${apiVersion}/products/categories/${categoryId}`,
@@ -108,7 +98,7 @@ const deleteProductCategory = async (categoryId) => {
       }
     })
 
-    console.log("✅ Product category deleted successfully")
+    bru.deleteVar(categoryId)
   } catch (error) {
     console.error("❌ Product category deletion failed:", error.message)
     throw error

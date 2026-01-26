@@ -3,6 +3,7 @@ meta {
   type: http
   tags: [
     entities
+    products
   ]
 }
 
@@ -22,11 +23,11 @@ headers {
 
 body:json {
   {
-    "name": "Updated Name",
-    "description": "Updated description",
+    "name": "entities.product.update-not-found",
+    "description": "A product for update testing - entities.product.update-not-found",
     "price": 99.99,
     "stock": 500,
-    "categoryId": "{{testProductCategoryId}}"
+    "categoryId": "{{entities.product.folder.productCategoryId}}"
   }
 }
 

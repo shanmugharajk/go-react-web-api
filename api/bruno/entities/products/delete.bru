@@ -3,6 +3,7 @@ meta {
   type: http
   tags: [
     entities
+    products
   ]
 }
 
@@ -10,19 +11,19 @@ script:pre-request {
   const product = require('./scripts/product.js')
 
   const productData = {
-    name: "Test",
-    description: "A test product for API testing",
+    name: "entities.product.delete",
+    description: "A product for delete testing - entities.product.delete",
     price: 29.99,
     stock: 100,
-    categoryId: bru.getVar('testProductCategoryId')
+    categoryId: bru.getVar('entities.product.folder.productCategoryId')
   }
 
-  const { id: productId } = await product.createProduct(productData)
-  bru.setVar('idToDelete', productId.toString());
+  const result = await product.createProduct(productData)
+  bru.setVar('entities.product.delete.id', result.id.toString());
 }
 
 delete {
-  url: {{baseUrl}}/api/{{apiVersion}}/products/{{idToDelete}}
+  url: {{baseUrl}}/api/{{apiVersion}}/products/{{entities.product.delete.id}}
   body: none
   auth: bearer
 }

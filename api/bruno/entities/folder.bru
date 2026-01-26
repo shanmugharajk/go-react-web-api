@@ -3,6 +3,8 @@ meta {
 }
 
 script:pre-request {
+  // Folder-level fixture setup: registers test user and obtains JWT token
+  // Token is used for authentication across all entity tests
   const auth = require('./scripts/auth.js')
   await auth.register()
 }

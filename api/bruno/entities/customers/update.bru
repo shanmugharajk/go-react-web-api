@@ -3,6 +3,7 @@ meta {
   type: http
   tags: [
     entities
+    customers
   ]
 }
 
@@ -10,19 +11,19 @@ script:pre-request {
   const customer = require('./scripts/customer.js')
 
   const customerData = {
-    name: "Customer-to-Update",
-    email: "customer-to-update@example.com",
+    name: "entities.customer.update",
+    email: "entities.customer.update@example.com",
     mobile: "9876543210",
     balance: 50.00
   }
 
   const { id: customerId } = await customer.createCustomer(customerData)
-  bru.setVar('customerToUpdateId', customerId.toString());
+  bru.setVar('entities.customer.update.id', customerId.toString());
 }
 
 script:post-response {
   const customer = require('./scripts/customer.js')
-  const customerId = bru.getVar('customerToUpdateId');
+  const customerId = bru.getVar('entities.customer.update.id');
 
   if (customerId) {
     await customer.deleteCustomer(customerId);
@@ -30,7 +31,7 @@ script:post-response {
 }
 
 put {
-  url: {{baseUrl}}/api/{{apiVersion}}/customers/{{customerToUpdateId}}
+  url: {{baseUrl}}/api/{{apiVersion}}/customers/{{entities.customer.update.id}}
   body: json
   auth: bearer
 }
@@ -45,7 +46,7 @@ headers {
 
 body:json {
   {
-    "email": "updated-customer@example.com",
+    "email": "entities.customer.update@example.com",
     "balance": 250.75,
     "active": false
   }
@@ -69,13 +70,13 @@ tests {
 
   test("should return customer with same ID", function() {
     const body = res.getBody();
-    expect(body.data.id).to.equal(bru.getVar('customerToUpdateId'));
+    expect(body.data.id).to.equal(bru.getVar('entities.customer.update.id'));
   });
 
   test("should return customer with updated data", function() {
     const body = res.getBody();
     const customer = body.data;
-    expect(customer.email).to.equal("updated-customer@example.com");
+    expect(customer.email).to.equal("entities.customer.update@example.com");
     expect(customer.balance).to.equal(250.75);
     expect(customer.active).to.equal(false);
   });
@@ -84,7 +85,7 @@ tests {
     const body = res.getBody();
     const customer = body.data;
     // Name and mobile should remain unchanged
-    expect(customer.name).to.equal("Customer-to-Update");
+    expect(customer.name).to.equal("entities.customer.update");
     expect(customer.mobile).to.equal("9876543210");
   });
 

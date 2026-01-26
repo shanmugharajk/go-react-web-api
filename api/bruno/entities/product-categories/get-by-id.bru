@@ -3,6 +3,7 @@ meta {
   type: http
   tags: [
     entities
+    product-categories
   ]
 }
 
@@ -10,19 +11,18 @@ script:pre-request {
   const product = require('./scripts/product.js')
 
   const categoryData = {
-    name: "Category-For-GetById",
-    description: "A category for get by ID testing"
+    name: "entities.product-category.get-by-id",
+    description: "A category for get by ID testing - entities.product-category.get-by-id"
   }
 
-  await product.createProductCategory(categoryData)
+  const { id: categoryId } = await product.createProductCategory(categoryData)
 
-  const { id: categoryId } = bru.getVar('Category-For-GetById')
-  bru.setVar('categoryToGetId', categoryId.toString())
+  bru.setVar('entities.product-category.get-by-id.id', categoryId.toString());
 }
 
 script:post-response {
   const product = require('./scripts/product.js')
-  const categoryId = bru.getVar('categoryToGetId');
+  const categoryId = bru.getVar('entities.product-category.get-by-id.id');
 
   if (categoryId) {
     await product.deleteProductCategory(categoryId);
@@ -30,7 +30,7 @@ script:post-response {
 }
 
 get {
-  url: {{baseUrl}}/api/{{apiVersion}}/products/categories/{{categoryToGetId}}
+  url: {{baseUrl}}/api/{{apiVersion}}/products/categories/{{entities.product-category.get-by-id.id}}
   body: none
   auth: bearer
 }
@@ -58,9 +58,7 @@ tests {
   test("should return category with correct ID", function() {
     const body = res.getBody();
     expect(body.data).to.have.property('id');
-    expect(body.data.id).to.be.a('string');
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    expect(body.data.id).to.match(uuidRegex);
+    expect(body.data.id).to.equal(bru.getVar('entities.product-category.get-by-id.id'));
   });
 
   test("should return category with required fields", function() {
@@ -72,5 +70,12 @@ tests {
     expect(category).to.have.property('updatedAt');
     expect(category).to.have.property('createdBy');
     expect(category).to.have.property('updatedBy');
+  });
+
+  test("should return category with valid UUID", function() {
+    const { isValidUUID } = require('./scripts/utils');
+
+    const body = res.getBody();
+    expect(isValidUUID(body.data.id)).to.be.true;
   });
 }

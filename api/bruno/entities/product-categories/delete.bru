@@ -3,6 +3,7 @@ meta {
   type: http
   tags: [
     entities
+    product-categories
   ]
 }
 
@@ -10,18 +11,16 @@ script:pre-request {
   const product = require('./scripts/product.js')
 
   const categoryData = {
-    name: "Category-To-Delete",
-    description: "A category for delete testing"
+    name: "entities.product-category.delete",
+    description: "A category for delete testing entities.product-category.delete@example.com"
   }
 
-  await product.createProductCategory(categoryData)
-
-  const { id: categoryId } = bru.getVar('Category-To-Delete')
-  bru.setVar('categoryToDeleteId', categoryId.toString())
+  const { id: categoryId } = await product.createProductCategory(categoryData)
+  bru.setVar('entities.product-category.delete.id', categoryId.toString());
 }
 
 delete {
-  url: {{baseUrl}}/api/{{apiVersion}}/products/categories/{{categoryToDeleteId}}
+  url: {{baseUrl}}/api/{{apiVersion}}/products/categories/{{entities.product-category.delete.id}}
   body: none
   auth: bearer
 }

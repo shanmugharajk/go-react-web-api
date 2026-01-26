@@ -3,6 +3,7 @@ meta {
   type: http
   tags: [
     entities
+    products
   ]
 }
 
@@ -22,10 +23,19 @@ headers {
 
 body:json {
   {
-    "name": "Test Product",
-    "description": "A test product for API testing",
+    "name": "entities.product.create",
+    "description": "A product for create testing - entities.product.create",
     "isActive": true,
-    "categoryId": "{{testProductCategoryId}}"
+    "categoryId": "{{entities.product.folder.productCategoryId}}"
+  }
+}
+
+script:post-response {
+  const product = require('./scripts/product.js')
+  
+  const body = res.getBody();
+  if (body?.data?.id) {
+    await product.deleteProduct(body.data.id);
   }
 }
 
@@ -46,19 +56,18 @@ tests {
   });
 
   test("should return product with valid UUID", function() {
+    const { isValidUUID } = require('./scripts/utils');
+
     const body = res.getBody();
     expect(body.data).to.have.property('id');
-    expect(body.data.id).to.be.a('string');
-    // UUID format validation
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    expect(body.data.id).to.match(uuidRegex);
+    expect(isValidUUID(body.data.id)).to.be.true;
   });
 
   test("should return product with correct data", function() {
     const body = res.getBody();
     const product = body.data;
-    expect(product.name).to.equal("Test Product");
-    expect(product.description).to.equal("A test product for API testing");
+    expect(product.name).to.equal("entities.product.create");
+    expect(product.description).to.equal("A product for create testing - entities.product.create");
     expect(product.isActive).to.equal(true);
   });
 
@@ -73,10 +82,5 @@ tests {
     expect(product).to.have.property('updatedAt');
     expect(product).to.have.property('createdBy');
     expect(product).to.have.property('updatedBy');
-  });
-
-  test("should set testProductId for other tests", function() {
-    const body = res.getBody();
-    bru.setVar('testProductId', body.data.id);
   });
 }

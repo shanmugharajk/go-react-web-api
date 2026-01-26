@@ -3,11 +3,26 @@ meta {
   type: http
   tags: [
     entities
+    customers
   ]
 }
 
+script:pre-request {
+  const customer = require('./scripts/customer.js')
+
+  const customerData = {
+    name: "entities.customer.get-by-id",
+    email: "entities.customer.get-by-id@example.com",
+    mobile: "5551234567",
+    balance: 0
+  }
+
+  const { id: customerId } = await customer.createCustomer(customerData)
+  bru.setVar('entities.customer.get-by-id.id', customerId.toString());
+}
+
 get {
-  url: {{baseUrl}}/api/{{apiVersion}}/customers/{{testCustomerId}}
+  url: {{baseUrl}}/api/{{apiVersion}}/customers/{{entities.customer.get-by-id.id}}
   body: none
   auth: bearer
 }
@@ -34,7 +49,7 @@ tests {
 
   test("should return customer with correct ID", function() {
     const body = res.getBody();
-    expect(body.data.id).to.equal(bru.getVar('testCustomerId'));
+    expect(body.data.id).to.equal(bru.getVar('entities.customer.get-by-id.id'));
   });
 
   test("should return customer with required fields", function() {
@@ -50,5 +65,12 @@ tests {
     expect(customer).to.have.property('updatedAt');
     expect(customer).to.have.property('createdBy');
     expect(customer).to.have.property('updatedBy');
+  });
+
+  test("should return customer with valid UUID", function() {
+    const { isValidUUID } = require('./scripts/utils');
+
+    const body = res.getBody();
+    expect(isValidUUID(body.data.id)).to.be.true;
   });
 }
