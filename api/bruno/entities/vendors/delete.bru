@@ -1,0 +1,39 @@
+meta {
+  name: Delete Vendor (Soft Delete)
+  type: http
+  tags: [
+    entities
+    vendors
+  ]
+}
+
+script:pre-request {
+  // Create a new vendor to delete in this test
+  const vendor = require('./scripts/vendor.js')
+
+  const vendorData = {
+    name: `entities.vendor.delete.${Date.now()}`,
+    email: "delete@vendor.local",
+    phone: "+1234567890",
+    address: "Vendor to Delete"
+  }
+
+  const vendorResult = await vendor.createVendor(vendorData)
+  bru.setVar('entities.vendor.delete.vendorId', vendorResult.id.toString())
+}
+
+delete {
+  url: {{baseUrl}}/api/{{apiVersion}}/vendors/{{entities.vendor.delete.vendorId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+tests {
+  test("should return 204 No Content", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}

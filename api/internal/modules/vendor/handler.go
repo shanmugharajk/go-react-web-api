@@ -86,6 +86,8 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if validator.IsValidationError(err) {
 			response.Error(w, http.StatusBadRequest, err.Error())
+		} else if errors.IsConstraintViolation(err) {
+			response.Error(w, http.StatusBadRequest, "Vendor with this name already exists")
 		} else {
 			response.Error(w, http.StatusInternalServerError, "Failed to create vendor")
 		}
@@ -124,6 +126,10 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		}
 		if validator.IsValidationError(err) {
 			response.Error(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		if errors.IsConstraintViolation(err) {
+			response.Error(w, http.StatusBadRequest, "Vendor with this name already exists")
 			return
 		}
 		response.Error(w, http.StatusInternalServerError, "Failed to update vendor")

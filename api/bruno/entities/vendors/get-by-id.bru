@@ -1,0 +1,61 @@
+meta {
+  name: Get Vendor By ID
+  type: http
+  tags: [
+    entities
+    vendors
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/{{apiVersion}}/vendors/{{entities.vendors.folder.vendorId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+tests {
+  test("should return 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return vendor object", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('object');
+  });
+
+  test("should return vendor with correct ID", function() {
+    const body = res.getBody();
+    expect(body.data).to.have.property('id');
+    expect(body.data.id).to.equal(bru.getVar('entities.vendors.folder.vendorId'));
+  });
+
+  test("should return vendor with required fields", function() {
+    const body = res.getBody();
+    const vendor = body.data;
+    expect(vendor).to.have.property('name');
+    expect(vendor).to.have.property('email');
+    expect(vendor).to.have.property('phone');
+    expect(vendor).to.have.property('address');
+    expect(vendor).to.have.property('balance');
+    expect(vendor).to.have.property('createdAt');
+    expect(vendor).to.have.property('updatedAt');
+    expect(vendor).to.have.property('createdBy');
+    expect(vendor).to.have.property('updatedBy');
+  });
+
+  test("should return vendor with balance field", function() {
+    const body = res.getBody();
+    const vendor = body.data;
+    expect(vendor.balance).to.be.a('number');
+  });
+}

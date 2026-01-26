@@ -1,0 +1,46 @@
+meta {
+  name: Update Vendor (Unauthenticated)
+  type: http
+  tags: [
+    entities
+    vendors
+  ]
+}
+
+put {
+  url: {{baseUrl}}/api/{{apiVersion}}/vendors/{{entities.vendors.folder.vendorId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer invalid_token
+}
+
+body:json {
+  {
+    "name": "entities.vendors.folder.vendor",
+    "email": "unauth@vendor.local",
+    "phone": "+1234567890",
+    "address": "Unauthenticated Update Address"
+  }
+}
+
+tests {
+  test("should return 401 Unauthorized", function() {
+    expect(res.getStatus()).to.equal(401);
+  });
+
+  test("should return error response", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(false);
+  });
+
+  test("should return error message", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('error');
+    expect(body.error).to.be.a('string');
+  });
+}

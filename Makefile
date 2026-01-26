@@ -1,5 +1,7 @@
 .PHONY: help run test test-watch clean
 
+TAGS ?= entities
+
 help: ## Show this help message
 	@echo 'Usage: make [target]'
 	@echo ''
@@ -10,11 +12,11 @@ run: ## Run the server (with fresh database)
 	@rm -rf api/data/pos.db
 	@cd api && go run cmd/server/main.go
 
-test: ## Run Bruno API tests (requires server to be running)
-	@cd api/bruno && bru run --env local --tags entities
+test: ## Run Bruno API tests - Usage: make test or make test TAGS=entities
+	@cd api/bruno && bru run --env local --tags $(TAGS)
 
-test-watch: ## Run Bruno tests in watch mode
-	@cd api/bruno && bru run --env local --tags entities --watch
+test-watch: ## Run Bruno tests in watch mode - Usage: make test-watch or make test-watch TAGS=shan
+	@cd api/bruno && bru run --env local --tags $(TAGS) --watch
 
 clean: ## Remove generated files and databases
 	@rm -rf api/data/pos.db

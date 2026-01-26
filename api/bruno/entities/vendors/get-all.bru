@@ -1,0 +1,48 @@
+meta {
+  name: Get All Vendors
+  type: http
+  tags: [
+    entities
+    vendors
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/{{apiVersion}}/vendors
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+tests {
+  test("should return 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return vendors array", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('array');
+  });
+
+  test("should return vendors with required fields", function() {
+    const body = res.getBody();
+    if (body.data.length > 0) {
+      const vendor = body.data[0];
+      expect(vendor).to.have.property('id');
+      expect(vendor).to.have.property('name');
+      expect(vendor).to.have.property('email');
+      expect(vendor).to.have.property('phone');
+      expect(vendor).to.have.property('address');
+      expect(vendor).to.have.property('balance');
+    }
+  });
+}

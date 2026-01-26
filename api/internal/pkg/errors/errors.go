@@ -3,6 +3,7 @@ package errors
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -73,4 +74,18 @@ func IsNotFound(err error) bool {
 		return false
 	}
 	return errors.Is(err, ErrNotFound) || errors.Is(err, gorm.ErrRecordNotFound)
+}
+
+// IsConstraintViolation checks if the error is a database constraint violation.
+// This includes unique constraint, foreign key, and other database constraints.
+func IsConstraintViolation(err error) bool {
+	if err == nil {
+		return false
+	}
+	errStr := err.Error()
+	// SQLite constraint violation patterns
+	return strings.Contains(errStr, "UNIQUE constraint failed") ||
+		strings.Contains(errStr, "FOREIGN KEY constraint failed") ||
+		strings.Contains(errStr, "NOT NULL constraint failed") ||
+		strings.Contains(errStr, "CHECK constraint failed")
 }

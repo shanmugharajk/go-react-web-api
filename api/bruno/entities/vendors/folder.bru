@@ -1,0 +1,22 @@
+meta {
+  name: vendors test
+}
+
+script:pre-request {
+  // Folder-level fixture setup: creates shared test vendor
+  // This vendor is cached and reused across all vendor tests in this folder
+  // Note: Cleanup is NOT done here - the fixture persists for the entire test run
+  // Individual tests handle their own cleanup for data they create
+
+  const vendor = require('./scripts/vendor.js')
+
+  const vendorData = {
+    name: "entities.vendors.folder.vendor",
+    email: "vendor@test.local",
+    phone: "+1234567890",
+    address: "Test Vendor Address"
+  }
+
+  const vendorResult = await vendor.createVendor(vendorData)
+  bru.setVar('entities.vendors.folder.vendorId', vendorResult.id.toString())
+}

@@ -1,0 +1,94 @@
+meta {
+  name: Create Vendor
+  type: http
+  tags: [
+    entities
+    vendors
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/{{apiVersion}}/vendors
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "entities.vendor.create",
+    "email": "create@vendor.local",
+    "phone": "+1234567890",
+    "address": "Test Vendor Address"
+  }
+}
+
+script:post-response {
+  const vendor = require('./scripts/vendor.js')
+
+  const body = res.getBody();
+  if (body?.data?.id) {
+    await vendor.deleteVendor(body.data.id);
+  }
+}
+
+tests {
+  test("should return 201 Created", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return created vendor object", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('object');
+  });
+
+  test("should return vendor with valid UUID", function() {
+    const { isValidUUID } = require('./scripts/utils');
+
+    const body = res.getBody();
+    expect(body.data).to.have.property('id');
+    expect(isValidUUID(body.data.id)).to.be.true;
+  });
+
+  test("should return vendor with correct data", function() {
+    const body = res.getBody();
+    const vendorData = body.data;
+    expect(vendorData.name).to.equal("entities.vendor.create");
+    expect(vendorData.email).to.equal("create@vendor.local");
+    expect(vendorData.phone).to.equal("+1234567890");
+    expect(vendorData.address).to.equal("Test Vendor Address");
+  });
+
+  test("should return vendor with required fields", function() {
+    const body = res.getBody();
+    const vendorData = body.data;
+    expect(vendorData).to.have.property('name');
+    expect(vendorData).to.have.property('email');
+    expect(vendorData).to.have.property('phone');
+    expect(vendorData).to.have.property('address');
+    expect(vendorData).to.have.property('balance');
+    expect(vendorData).to.have.property('createdAt');
+    expect(vendorData).to.have.property('updatedAt');
+    expect(vendorData).to.have.property('createdBy');
+    expect(vendorData).to.have.property('updatedBy');
+  });
+
+  test("should return vendor with initial balance of 0", function() {
+    const body = res.getBody();
+    const vendorData = body.data;
+    expect(vendorData.balance).to.equal(0);
+  });
+}
