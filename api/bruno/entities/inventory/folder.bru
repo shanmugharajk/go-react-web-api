@@ -1,0 +1,46 @@
+meta {
+  name: inventory test
+}
+
+script:pre-request {
+  // Folder-level fixture setup: creates shared product and product batch
+  // These are cached and reused across all tests in this folder
+  // Note: Cleanup is NOT done here - these fixtures persist for the entire test run
+  // Individual tests handle their own cleanup for data they create
+
+  const product = require('./scripts/product.js')
+  const inventory = require('./scripts/inventory.js')
+
+  // Create or get cached product category
+  const productCategoryData = {
+    name: "entities.inventory.folder.productCategory",
+    description: "A category for inventory testing - entities.inventory.folder.productCategory"
+  }
+
+  const productCategoryResult = await product.createProductCategory(productCategoryData)
+  bru.setVar('entities.inventory.folder.productCategoryId', productCategoryResult.id.toString())
+
+  // Create or get cached product
+  const productData = {
+    name: "entities.inventory.folder.product",
+    description: "A product for inventory testing - entities.inventory.folder.product",
+    isActive: true,
+    categoryId: productCategoryResult.id
+  }
+
+  const productResult = await product.createProduct(productData)
+  bru.setVar('entities.inventory.folder.productId', productResult.id.toString())
+
+  // Create or get cached product batch
+  const batchData = {
+    name: "entities.inventory.folder.productBatch",
+    productId: productResult.id,
+    costPrice: 50.00,
+    sellingPrice: 99.99,
+    quantityAvailable: 100,
+    purchasedAt: new Date().toISOString()
+  }
+
+  const batchResult = await inventory.createProductBatch(batchData)
+  bru.setVar('entities.inventory.folder.productBatchId', batchResult.id.toString())
+}

@@ -1,0 +1,46 @@
+meta {
+  name: Delete Product Batch
+  type: http
+  tags: [
+    entities
+    inventory
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/api/{{apiVersion}}/inventory/batches/{{entities.inventory.delete.batchId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+script:pre-request {
+  const inventory = require('./scripts/inventory.js')
+
+  // Create a batch to delete
+  const batchData = {
+    name: "entities.inventory.delete.batch",
+    productId: bru.getVar('entities.inventory.folder.productId'),
+    costPrice: 15.00,
+    sellingPrice: 29.99,
+    quantityAvailable: 50,
+    purchasedAt: new Date().toISOString()
+  }
+
+  const batchResult = await inventory.createProductBatch(batchData)
+  bru.setVar('entities.inventory.delete.batchId', batchResult.id.toString())
+}
+
+tests {
+  test("should return 204 No Content", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+
+  test("should return empty response body", function() {
+    const body = res.getBody();
+    expect(body).to.be.empty;
+  });
+}

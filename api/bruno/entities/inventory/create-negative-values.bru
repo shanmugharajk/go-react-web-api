@@ -1,0 +1,50 @@
+meta {
+  name: Create Product Batch - Negative Values
+  type: http
+  tags: [
+    entities
+    inventory
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/{{apiVersion}}/inventory/batches
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "productId": "{{entities.inventory.folder.productId}}",
+    "costPrice": -10.00,
+    "sellingPrice": -20.00,
+    "quantityAvailable": -5,
+    "purchasedAt": "2024-01-15T10:00:00Z"
+  }
+}
+
+tests {
+  test("should return 400 Bad Request", function() {
+    expect(res.getStatus()).to.equal(400);
+  });
+
+  test("should return error status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(false);
+  });
+
+  test("should return error message", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('error');
+    expect(body.error).to.be.a('string');
+  });
+}

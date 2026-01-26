@@ -1,0 +1,51 @@
+meta {
+  name: Create Product Batch - Invalid Product ID
+  type: http
+  tags: [
+    entities
+    inventory
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/{{apiVersion}}/inventory/batches
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "productId": "00000000-0000-0000-0000-000000000000",
+    "costPrice": 25.50,
+    "sellingPrice": 49.99,
+    "quantityAvailable": 50,
+    "purchasedAt": "2024-01-15T10:00:00Z"
+  }
+}
+
+tests {
+  test("should return 400 or 500 status", function() {
+    const status = res.getStatus();
+    expect([400, 500]).to.include(status);
+  });
+
+  test("should return error status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(false);
+  });
+
+  test("should return error message", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('error');
+    expect(body.error).to.be.a('string');
+  });
+}

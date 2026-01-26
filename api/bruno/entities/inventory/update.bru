@@ -1,0 +1,97 @@
+meta {
+  name: Update Product Batch
+  type: http
+  tags: [
+    entities
+    inventory
+  ]
+}
+
+put {
+  url: {{baseUrl}}/api/{{apiVersion}}/inventory/batches/{{entities.inventory.update.batchId}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "costPrice": 30.00,
+    "sellingPrice": 59.99,
+    "quantityAvailable": 75,
+    "purchasedAt": "2024-02-01T10:00:00Z"
+  }
+}
+
+script:pre-request {
+  const inventory = require('./scripts/inventory.js')
+
+  // Create a batch to update
+  const batchData = {
+    name: "entities.inventory.update.batch",
+    productId: bru.getVar('entities.inventory.folder.productId'),
+    costPrice: 20.00,
+    sellingPrice: 39.99,
+    quantityAvailable: 100,
+    purchasedAt: new Date().toISOString()
+  }
+
+  const batchResult = await inventory.createProductBatch(batchData)
+  bru.setVar('entities.inventory.update.batchId', batchResult.id.toString())
+}
+
+script:post-response {
+  const inventory = require('./scripts/inventory.js')
+
+  const batchId = bru.getVar('entities.inventory.update.batchId')
+  if (batchId) {
+    await inventory.deleteProductBatch(batchId)
+  }
+}
+
+tests {
+  test("should return 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return updated batch object", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('object');
+  });
+
+  test("should return batch with updated values", function() {
+    const body = res.getBody();
+    const batch = body.data;
+    expect(batch.costPrice).to.equal(30.00);
+    expect(batch.sellingPrice).to.equal(59.99);
+    expect(batch.quantityAvailable).to.equal(75);
+  });
+
+  test("should return batch with required fields", function() {
+    const body = res.getBody();
+    const batch = body.data;
+    expect(batch).to.have.property('id');
+    expect(batch).to.have.property('productId');
+    expect(batch).to.have.property('costPrice');
+    expect(batch).to.have.property('sellingPrice');
+    expect(batch).to.have.property('quantityAvailable');
+    expect(batch).to.have.property('purchasedAt');
+    expect(batch).to.have.property('createdAt');
+    expect(batch).to.have.property('updatedAt');
+    expect(batch).to.have.property('createdBy');
+    expect(batch).to.have.property('updatedBy');
+  });
+}

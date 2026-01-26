@@ -1,0 +1,63 @@
+meta {
+  name: Get Product Batch By ID
+  type: http
+  tags: [
+    entities
+    inventory
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/{{apiVersion}}/inventory/batches/{{entities.inventory.folder.productBatchId}}
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+tests {
+  test("should return 200 OK", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return product batch object", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('object');
+  });
+
+  test("should return batch with valid UUID", function() {
+    const { isValidUUID } = require('./scripts/utils');
+
+    const body = res.getBody();
+    expect(body.data).to.have.property('id');
+    expect(isValidUUID(body.data.id)).to.be.true;
+  });
+
+  test("should return correct batch", function() {
+    const body = res.getBody();
+    expect(body.data.id).to.equal(bru.getVar('entities.inventory.folder.productBatchId'));
+  });
+
+  test("should return batch with required fields", function() {
+    const body = res.getBody();
+    const batch = body.data;
+    expect(batch).to.have.property('id');
+    expect(batch).to.have.property('productId');
+    expect(batch).to.have.property('costPrice');
+    expect(batch).to.have.property('sellingPrice');
+    expect(batch).to.have.property('quantityAvailable');
+    expect(batch).to.have.property('purchasedAt');
+    expect(batch).to.have.property('createdAt');
+    expect(batch).to.have.property('updatedAt');
+    expect(batch).to.have.property('createdBy');
+    expect(batch).to.have.property('updatedBy');
+  });
+}

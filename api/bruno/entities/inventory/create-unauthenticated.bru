@@ -1,0 +1,47 @@
+meta {
+  name: Create Product Batch - Unauthenticated
+  type: http
+  tags: [
+    entities
+    inventory
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/{{apiVersion}}/inventory/batches
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer invalid_token
+}
+
+body:json {
+  {
+    "productId": "{{entities.inventory.folder.productId}}",
+    "costPrice": 25.50,
+    "sellingPrice": 49.99,
+    "quantityAvailable": 50,
+    "purchasedAt": "2024-01-15T10:00:00Z"
+  }
+}
+
+tests {
+  test("should return 401 Unauthorized", function() {
+    expect(res.getStatus()).to.equal(401);
+  });
+
+  test("should return error status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(false);
+  });
+
+  test("should return error message", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('error');
+    expect(body.error).to.be.a('string');
+  });
+}

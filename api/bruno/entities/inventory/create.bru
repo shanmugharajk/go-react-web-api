@@ -1,0 +1,90 @@
+meta {
+  name: Create Product Batch
+  type: http
+  tags: [
+    entities
+    inventory
+  ]
+}
+
+post {
+  url: {{baseUrl}}/api/{{apiVersion}}/inventory/batches
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "productId": "{{entities.inventory.folder.productId}}",
+    "costPrice": 25.50,
+    "sellingPrice": 49.99,
+    "quantityAvailable": 50,
+    "purchasedAt": "2024-01-15T10:00:00Z"
+  }
+}
+
+script:post-response {
+  const inventory = require('./scripts/inventory.js')
+
+  const body = res.getBody();
+  if (body?.data?.id) {
+    await inventory.deleteProductBatch(body.data.id);
+  }
+}
+
+tests {
+  test("should return 201 Created", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+
+  test("should return success status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(true);
+  });
+
+  test("should return created product batch object", function() {
+    const body = res.getBody();
+    expect(body.data).to.be.an('object');
+  });
+
+  test("should return batch with valid UUID", function() {
+    const { isValidUUID } = require('./scripts/utils');
+
+    const body = res.getBody();
+    expect(body.data).to.have.property('id');
+    expect(isValidUUID(body.data.id)).to.be.true;
+  });
+
+  test("should return batch with correct data", function() {
+    const body = res.getBody();
+    const batch = body.data;
+    expect(batch.productId).to.equal(bru.getVar('entities.inventory.folder.productId'));
+    expect(batch.costPrice).to.equal(25.50);
+    expect(batch.sellingPrice).to.equal(49.99);
+    expect(batch.quantityAvailable).to.equal(50);
+  });
+
+  test("should return batch with required fields", function() {
+    const body = res.getBody();
+    const batch = body.data;
+    expect(batch).to.have.property('id');
+    expect(batch).to.have.property('productId');
+    expect(batch).to.have.property('costPrice');
+    expect(batch).to.have.property('sellingPrice');
+    expect(batch).to.have.property('quantityAvailable');
+    expect(batch).to.have.property('purchasedAt');
+    expect(batch).to.have.property('createdAt');
+    expect(batch).to.have.property('updatedAt');
+    expect(batch).to.have.property('createdBy');
+    expect(batch).to.have.property('updatedBy');
+  });
+}

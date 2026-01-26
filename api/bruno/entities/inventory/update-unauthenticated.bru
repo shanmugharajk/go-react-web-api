@@ -1,0 +1,46 @@
+meta {
+  name: Update Product Batch - Unauthenticated
+  type: http
+  tags: [
+    entities
+    inventory
+  ]
+}
+
+put {
+  url: {{baseUrl}}/api/{{apiVersion}}/inventory/batches/{{entities.inventory.folder.productBatchId}}
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: Bearer invalid_token
+}
+
+body:json {
+  {
+    "costPrice": 30.00,
+    "sellingPrice": 59.99,
+    "quantityAvailable": 75,
+    "purchasedAt": "2024-02-01T10:00:00Z"
+  }
+}
+
+tests {
+  test("should return 401 Unauthorized", function() {
+    expect(res.getStatus()).to.equal(401);
+  });
+
+  test("should return error status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(false);
+  });
+
+  test("should return error message", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('error');
+    expect(body.error).to.be.a('string');
+  });
+}

@@ -1,0 +1,36 @@
+meta {
+  name: Get Product Batch By ID - Not Found
+  type: http
+  tags: [
+    entities
+    inventory
+  ]
+}
+
+get {
+  url: {{baseUrl}}/api/{{apiVersion}}/inventory/batches/00000000-0000-0000-0000-000000000000
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{jwt_token}}
+}
+
+tests {
+  test("should return 404 Not Found", function() {
+    expect(res.getStatus()).to.equal(404);
+  });
+
+  test("should return error status", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('success');
+    expect(body.success).to.equal(false);
+  });
+
+  test("should return error message", function() {
+    const body = res.getBody();
+    expect(body).to.have.property('error');
+    expect(body.error).to.be.a('string');
+  });
+}
