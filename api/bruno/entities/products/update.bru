@@ -12,8 +12,7 @@ script:pre-request {
   const productData = {
     name: "Product-to-Update",
     description: "A test product for update testing",
-    price: 29.99,
-    stock: 75,
+    isActive: true,
     categoryId: bru.getVar('testProductCategoryId')
   }
 
@@ -48,8 +47,7 @@ body:json {
   {
     "name": "Updated-Product-Name",
     "description": "Updated-product-description",
-    "price": 79.99,
-    "stock": 250,
+    "isActive": false,
     "categoryId": "{{testProductCategoryId}}"
   }
 }
@@ -80,8 +78,7 @@ tests {
     const product = body.data;
     expect(product.name).to.equal("Updated-Product-Name");
     expect(product.description).to.equal("Updated-product-description");
-    expect(product.price).to.equal(79.99);
-    expect(product.stock).to.equal(250);
+    expect(product.isActive).to.equal(false);
   });
 
   test("should return product with required fields", function() {
@@ -89,8 +86,7 @@ tests {
     const product = body.data;
     expect(product).to.have.property('name');
     expect(product).to.have.property('description');
-    expect(product).to.have.property('price');
-    expect(product).to.have.property('stock');
+    expect(product).to.have.property('isActive');
     expect(product).to.have.property('categoryId');
     expect(product).to.have.property('createdAt');
     expect(product).to.have.property('updatedAt');

@@ -10,8 +10,7 @@ type Product struct {
 	ID          uuid.UUID `gorm:"type:char(36);primaryKey" json:"id"`
 	Name        string    `gorm:"unique;not null" json:"name"`
 	Description string    `json:"description"`
-	Price       float64   `gorm:"not null" json:"price"`
-	Stock       int       `gorm:"not null;default:0" json:"stock"`
+	IsActive    bool      `gorm:"not null;default:true" json:"isActive"`
 
 	CategoryID uuid.UUID       `gorm:"type:char(36);index;not null" json:"categoryId"`
 	Category   ProductCategory `gorm:"foreignKey:CategoryID;references:ID;constraint:OnUpdate:CASCADE,OnDelete:RESTRICT;" json:"-"`
@@ -23,8 +22,7 @@ type Product struct {
 type CreateProductRequest struct {
 	Name        string    `json:"name" validate:"required,min=1,max=255"`
 	Description string    `json:"description" validate:"max=1000"`
-	Price       float64   `json:"price" validate:"required,gte=0"`
-	Stock       int       `json:"stock" validate:"gte=0"`
+	IsActive    bool      `json:"isActive"`
 	CategoryID  uuid.UUID `json:"categoryId" validate:"required"`
 }
 
@@ -32,8 +30,7 @@ type CreateProductRequest struct {
 type UpdateProductRequest struct {
 	Name        string    `json:"name" validate:"required,min=1,max=255"`
 	Description string    `json:"description" validate:"max=1000"`
-	Price       float64   `json:"price" validate:"required,gte=0"`
-	Stock       int       `json:"stock" validate:"gte=0"`
+	IsActive    bool      `json:"isActive"`
 	CategoryID  uuid.UUID `json:"categoryId" validate:"required"`
 }
 

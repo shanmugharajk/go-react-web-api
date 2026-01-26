@@ -46,8 +46,6 @@ tests {
     const product = body.data;
     expect(product).to.have.property('name');
     expect(product).to.have.property('description');
-    expect(product).to.have.property('price');
-    expect(product).to.have.property('stock');
     expect(product).to.have.property('categoryId');
     expect(product).to.have.property('createdAt');
     expect(product).to.have.property('updatedAt');

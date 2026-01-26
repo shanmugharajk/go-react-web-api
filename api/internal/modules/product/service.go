@@ -37,8 +37,7 @@ func (s *ProductService) Create(req CreateProductRequest, user *auth.User) (*Pro
 	product := &Product{
 		Name:        req.Name,
 		Description: req.Description,
-		Price:       req.Price,
-		Stock:       req.Stock,
+		IsActive:    req.IsActive,
 		CategoryID:  req.CategoryID,
 		AuditFields: common.AuditFields{
 			CreatedBy: user.ID,
@@ -66,8 +65,7 @@ func (s *ProductService) Update(id uuid.UUID, req UpdateProductRequest, user *au
 
 	product.Name = req.Name
 	product.Description = req.Description
-	product.Price = req.Price
-	product.Stock = req.Stock
+	product.IsActive = req.IsActive
 	product.CategoryID = req.CategoryID
 	product.UpdatedBy = user.ID
 

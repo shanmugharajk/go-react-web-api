@@ -24,8 +24,7 @@ body:json {
   {
     "name": "Test Product",
     "description": "A test product for API testing",
-    "price": 49.99,
-    "stock": 150,
+    "isActive": true,
     "categoryId": "{{testProductCategoryId}}"
   }
 }
@@ -60,8 +59,7 @@ tests {
     const product = body.data;
     expect(product.name).to.equal("Test Product");
     expect(product.description).to.equal("A test product for API testing");
-    expect(product.price).to.equal(49.99);
-    expect(product.stock).to.equal(150);
+    expect(product.isActive).to.equal(true);
   });
 
   test("should return product with required fields", function() {
@@ -69,8 +67,7 @@ tests {
     const product = body.data;
     expect(product).to.have.property('name');
     expect(product).to.have.property('description');
-    expect(product).to.have.property('price');
-    expect(product).to.have.property('stock');
+    expect(product).to.have.property('isActive');
     expect(product).to.have.property('categoryId');
     expect(product).to.have.property('createdAt');
     expect(product).to.have.property('updatedAt');
