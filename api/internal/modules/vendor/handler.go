@@ -1,4 +1,4 @@
-package customer
+package vendor
 
 import (
 	"encoding/json"
@@ -13,19 +13,19 @@ import (
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/validator"
 )
 
-// Handler handles HTTP requests for customers.
+// Handler handles HTTP requests for vendors.
 type Handler struct {
-	service *CustomerService
+	service *VendorService
 }
 
 // NewHandler creates a new Handler instance.
 func NewHandler(database *db.DB) *Handler {
-	repo := NewCustomerRepository(database.DB)
-	service := NewCustomerService(repo)
+	repo := NewVendorRepository(database.DB)
+	service := NewVendorService(repo)
 	return &Handler{service: service}
 }
 
-// Routes returns the customer routes.
+// Routes returns the vendor routes.
 func (h *Handler) Routes() chi.Router {
 	r := chi.NewRouter()
 	r.Get("/", h.GetAll)
@@ -36,37 +36,41 @@ func (h *Handler) Routes() chi.Router {
 	return r
 }
 
-// GetAll retrieves all customers.
+// GetAll retrieves all vendors.
 func (h *Handler) GetAll(w http.ResponseWriter, r *http.Request) {
-	customers, err := h.service.GetAll()
+	vendors, err := h.service.GetAll()
 	if err != nil {
-		response.Error(w, http.StatusInternalServerError, "Failed to fetch customers")
+		response.Error(w, http.StatusInternalServerError, "Failed to fetch vendors")
 		return
 	}
-	response.Success(w, customers)
+	response.Success(w, vendors)
 }
 
-// GetByID retrieves a customer by ID.
+// GetByID retrieves a vendor by ID.
 func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid customer ID")
+		response.Error(w, http.StatusBadRequest, "Invalid vendor ID")
 		return
 	}
 
-	customer, err := h.service.GetByID(id)
+	vendor, err := h.service.GetByID(id)
 	if err != nil {
-		response.Error(w, http.StatusNotFound, "Customer not found")
+		if errors.IsNotFound(err) {
+			response.Error(w, http.StatusNotFound, "Vendor not found")
+			return
+		}
+		response.Error(w, http.StatusInternalServerError, "Failed to fetch vendor")
 		return
 	}
 
-	response.Success(w, customer)
+	response.Success(w, vendor)
 }
 
-// Create creates a new customer.
+// Create creates a new vendor.
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-	var req CreateCustomerRequest
+	var req CreateVendorRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		response.Error(w, http.StatusBadRequest, "Invalid request payload")
 		return
@@ -78,29 +82,29 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	customer, err := h.service.Create(req, user)
+	vendor, err := h.service.Create(req, user)
 	if err != nil {
 		if validator.IsValidationError(err) {
 			response.Error(w, http.StatusBadRequest, err.Error())
 		} else {
-			response.Error(w, http.StatusInternalServerError, "Failed to create customer")
+			response.Error(w, http.StatusInternalServerError, "Failed to create vendor")
 		}
 		return
 	}
 
-	response.Created(w, customer)
+	response.Created(w, vendor)
 }
 
-// Update updates an existing customer.
+// Update updates an existing vendor.
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid customer ID")
+		response.Error(w, http.StatusBadRequest, "Invalid vendor ID")
 		return
 	}
 
-	var req UpdateCustomerRequest
+	var req UpdateVendorRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		response.Error(w, http.StatusBadRequest, "Invalid request payload")
 		return
@@ -112,38 +116,38 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	customer, err := h.service.Update(id, req, user)
+	vendor, err := h.service.Update(id, req, user)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			response.Error(w, http.StatusNotFound, "Customer not found")
+			response.Error(w, http.StatusNotFound, "Vendor not found")
 			return
 		}
 		if validator.IsValidationError(err) {
 			response.Error(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		response.Error(w, http.StatusInternalServerError, "Failed to update customer")
+		response.Error(w, http.StatusInternalServerError, "Failed to update vendor")
 		return
 	}
 
-	response.Success(w, customer)
+	response.Success(w, vendor)
 }
 
-// Delete deletes a customer (soft delete).
+// Delete deletes a vendor (soft delete).
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid customer ID")
+		response.Error(w, http.StatusBadRequest, "Invalid vendor ID")
 		return
 	}
 
 	if err := h.service.Delete(id); err != nil {
 		if errors.IsNotFound(err) {
-			response.Error(w, http.StatusNotFound, "Customer not found")
+			response.Error(w, http.StatusNotFound, "Vendor not found")
 			return
 		}
-		response.Error(w, http.StatusInternalServerError, "Failed to delete customer")
+		response.Error(w, http.StatusInternalServerError, "Failed to delete vendor")
 		return
 	}
 

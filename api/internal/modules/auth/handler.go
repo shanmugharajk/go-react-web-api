@@ -28,7 +28,7 @@ type Handler struct {
 
 // NewHandler creates a new auth handler.
 func NewHandler(database *db.DB, sessionStore *sessions.SQLiteStore, jwtService *jwt.TokenService, isDev bool, sessionTTL, jwtTTL time.Duration, trustProxy bool) *Handler {
-	repo := NewRepository(database)
+	repo := NewRepository(database.DB)
 	service := NewService(repo)
 	return &Handler{
 		service:      service,

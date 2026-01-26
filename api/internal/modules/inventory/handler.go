@@ -20,7 +20,7 @@ type BatchHandler struct {
 
 // NewBatchHandler creates a new batch handler.
 func NewBatchHandler(database *db.DB) *BatchHandler {
-	repo := NewBatchRepository(database)
+	repo := NewBatchRepository(database.DB)
 	service := NewBatchService(repo)
 	return &BatchHandler{service: service}
 }

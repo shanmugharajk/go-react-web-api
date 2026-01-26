@@ -16,7 +16,11 @@ import (
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/customer"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/inventory"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/payment"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/product"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/purchase"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/receiving"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/vendor"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/logger"
 )
 
@@ -51,6 +55,13 @@ func New() (*App, error) {
 		&customer.Customer{},
 		&product.Product{},
 		&inventory.ProductBatch{},
+		// Receivables module models
+		&vendor.Vendor{},
+		&purchase.PurchaseOrder{},
+		&purchase.PurchaseOrderItem{},
+		&receiving.StockReceipt{},
+		&receiving.StockReceiptItem{},
+		&payment.VendorPayment{},
 	); err != nil {
 		return nil, fmt.Errorf("failed to run auto-migrations: %w", err)
 	}

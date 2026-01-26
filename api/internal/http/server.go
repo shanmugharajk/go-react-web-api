@@ -38,7 +38,7 @@ func New(cfg *config.Config, database *db.DB) *Server {
 	jwtService := jwt.NewTokenService(cfg.Auth.JWTSecret)
 
 	// Initialize auth service for user lookup
-	authRepo := auth.NewRepository(database)
+	authRepo := auth.NewRepository(database.DB)
 	authService := auth.NewService(authRepo)
 
 	s := &Server{

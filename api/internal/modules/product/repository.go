@@ -2,18 +2,18 @@ package product
 
 import (
 	"github.com/google/uuid"
-	"github.com/shanmugharajk/go-react-web-api/api/internal/db"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/errors"
+	"gorm.io/gorm"
 )
 
 // ProductRepository handles data access for products.
 type ProductRepository struct {
-	db *db.DB
+	db *gorm.DB
 }
 
 // NewProductRepository creates a new product repository.
-func NewProductRepository(database *db.DB) *ProductRepository {
-	return &ProductRepository{db: database}
+func NewProductRepository(db *gorm.DB) *ProductRepository {
+	return &ProductRepository{db: db}
 }
 
 // FindAll retrieves all products.
@@ -61,12 +61,12 @@ func (r *ProductRepository) Delete(id uuid.UUID) error {
 
 // CategoryRepository handles data access for product categories.
 type CategoryRepository struct {
-	db *db.DB
+	db *gorm.DB
 }
 
 // NewCategoryRepository creates a new product category repository.
-func NewCategoryRepository(database *db.DB) *CategoryRepository {
-	return &CategoryRepository{db: database}
+func NewCategoryRepository(db *gorm.DB) *CategoryRepository {
+	return &CategoryRepository{db: db}
 }
 
 // FindAll retrieves all product categories.

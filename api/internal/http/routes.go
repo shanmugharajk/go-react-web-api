@@ -9,7 +9,11 @@ import (
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/auth"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/customer"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/inventory"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/payment"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/product"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/purchase"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/receiving"
+	"github.com/shanmugharajk/go-react-web-api/api/internal/modules/vendor"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/response"
 )
 
@@ -142,6 +146,29 @@ func (s *Server) setupRoutes() {
 			customerHandler := customer.NewHandler(s.db)
 			r.Get("/customers", customerHandler.GetAll)
 			r.Get("/customers/{id}", customerHandler.GetByID)
+
+			// Vendor read operations
+			vendorHandler := vendor.NewHandler(s.db)
+			r.Get("/vendors", vendorHandler.GetAll)
+			r.Get("/vendors/{id}", vendorHandler.GetByID)
+
+			// Purchase order read operations
+			purchaseHandler := purchase.NewHandler(s.db)
+			r.Get("/purchase-orders", purchaseHandler.GetAll)
+			r.Get("/purchase-orders/{id}", purchaseHandler.GetByID)
+			r.Get("/purchase-orders/vendor/{vendorId}", purchaseHandler.GetByVendorID)
+
+			// Stock receipt read operations
+			receivingHandler := receiving.NewHandler(s.db)
+			r.Get("/stock-receipts", receivingHandler.GetAll)
+			r.Get("/stock-receipts/{id}", receivingHandler.GetByID)
+			r.Get("/stock-receipts/purchase-order/{purchaseOrderId}", receivingHandler.GetByPurchaseOrderID)
+
+			// Vendor payment read operations
+			paymentHandler := payment.NewHandler(s.db)
+			r.Get("/vendor-payments", paymentHandler.GetAll)
+			r.Get("/vendor-payments/{id}", paymentHandler.GetByID)
+			r.Get("/vendor-payments/vendor/{vendorId}", paymentHandler.GetByVendorID)
 		})
 
 		// =================================================================
@@ -177,6 +204,26 @@ func (s *Server) setupRoutes() {
 			r.Post("/customers", customerHandler.Create)
 			r.Put("/customers/{id}", customerHandler.Update)
 			r.Delete("/customers/{id}", customerHandler.Delete)
+
+			// Vendor mutations
+			vendorHandler := vendor.NewHandler(s.db)
+			r.Post("/vendors", vendorHandler.Create)
+			r.Put("/vendors/{id}", vendorHandler.Update)
+			r.Delete("/vendors/{id}", vendorHandler.Delete)
+
+			// Purchase order mutations
+			purchaseHandler := purchase.NewHandler(s.db)
+			r.Post("/purchase-orders", purchaseHandler.Create)
+			r.Put("/purchase-orders/{id}", purchaseHandler.Update)
+			r.Delete("/purchase-orders/{id}", purchaseHandler.Delete)
+
+			// Stock receipt mutations
+			receivingHandler := receiving.NewHandler(s.db)
+			r.Post("/stock-receipts", receivingHandler.Create)
+
+			// Vendor payment mutations
+			paymentHandler := payment.NewHandler(s.db)
+			r.Post("/vendor-payments", paymentHandler.Create)
 		})
 	})
 }

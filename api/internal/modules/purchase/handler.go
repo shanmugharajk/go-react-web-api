@@ -1,4 +1,4 @@
-package customer
+package purchase
 
 import (
 	"encoding/json"
@@ -13,19 +13,19 @@ import (
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/validator"
 )
 
-// Handler handles HTTP requests for customers.
+// Handler handles HTTP requests for purchase orders.
 type Handler struct {
-	service *CustomerService
+	service *PurchaseOrderService
 }
 
 // NewHandler creates a new Handler instance.
 func NewHandler(database *db.DB) *Handler {
-	repo := NewCustomerRepository(database.DB)
-	service := NewCustomerService(repo)
+	repo := NewPurchaseOrderRepository(database.DB)
+	service := NewPurchaseOrderService(repo)
 	return &Handler{service: service}
 }
 
-// Routes returns the customer routes.
+// Routes returns the purchase order routes.
 func (h *Handler) Routes() chi.Router {
 	r := chi.NewRouter()
 	r.Get("/", h.GetAll)
@@ -33,40 +33,63 @@ func (h *Handler) Routes() chi.Router {
 	r.Get("/{id}", h.GetByID)
 	r.Put("/{id}", h.Update)
 	r.Delete("/{id}", h.Delete)
+	r.Get("/vendor/{vendorId}", h.GetByVendorID)
 	return r
 }
 
-// GetAll retrieves all customers.
+// GetAll retrieves all purchase orders.
 func (h *Handler) GetAll(w http.ResponseWriter, r *http.Request) {
-	customers, err := h.service.GetAll()
+	orders, err := h.service.GetAll()
 	if err != nil {
-		response.Error(w, http.StatusInternalServerError, "Failed to fetch customers")
+		response.Error(w, http.StatusInternalServerError, "Failed to fetch purchase orders")
 		return
 	}
-	response.Success(w, customers)
+	response.Success(w, orders)
 }
 
-// GetByID retrieves a customer by ID.
+// GetByID retrieves a purchase order by ID.
 func (h *Handler) GetByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid customer ID")
+		response.Error(w, http.StatusBadRequest, "Invalid purchase order ID")
 		return
 	}
 
-	customer, err := h.service.GetByID(id)
+	order, err := h.service.GetByID(id)
 	if err != nil {
-		response.Error(w, http.StatusNotFound, "Customer not found")
+		if errors.IsNotFound(err) {
+			response.Error(w, http.StatusNotFound, "Purchase order not found")
+			return
+		}
+		response.Error(w, http.StatusInternalServerError, "Failed to fetch purchase order")
 		return
 	}
 
-	response.Success(w, customer)
+	response.Success(w, order)
 }
 
-// Create creates a new customer.
+// GetByVendorID retrieves all purchase orders for a vendor.
+func (h *Handler) GetByVendorID(w http.ResponseWriter, r *http.Request) {
+	vendorIDStr := chi.URLParam(r, "vendorId")
+	vendorID, err := uuid.Parse(vendorIDStr)
+	if err != nil {
+		response.Error(w, http.StatusBadRequest, "Invalid vendor ID")
+		return
+	}
+
+	orders, err := h.service.GetByVendorID(vendorID)
+	if err != nil {
+		response.Error(w, http.StatusInternalServerError, "Failed to fetch purchase orders")
+		return
+	}
+
+	response.Success(w, orders)
+}
+
+// Create creates a new purchase order.
 func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
-	var req CreateCustomerRequest
+	var req CreatePurchaseOrderRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		response.Error(w, http.StatusBadRequest, "Invalid request payload")
 		return
@@ -78,29 +101,29 @@ func (h *Handler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	customer, err := h.service.Create(req, user)
+	order, err := h.service.Create(req, user)
 	if err != nil {
 		if validator.IsValidationError(err) {
 			response.Error(w, http.StatusBadRequest, err.Error())
-		} else {
-			response.Error(w, http.StatusInternalServerError, "Failed to create customer")
+			return
 		}
+		response.Error(w, http.StatusInternalServerError, "Failed to create purchase order")
 		return
 	}
 
-	response.Created(w, customer)
+	response.Created(w, order)
 }
 
-// Update updates an existing customer.
+// Update updates an existing purchase order.
 func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid customer ID")
+		response.Error(w, http.StatusBadRequest, "Invalid purchase order ID")
 		return
 	}
 
-	var req UpdateCustomerRequest
+	var req UpdatePurchaseOrderRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		response.Error(w, http.StatusBadRequest, "Invalid request payload")
 		return
@@ -112,38 +135,46 @@ func (h *Handler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	customer, err := h.service.Update(id, req, user)
+	order, err := h.service.Update(id, req, user)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			response.Error(w, http.StatusNotFound, "Customer not found")
+			response.Error(w, http.StatusNotFound, "Purchase order not found")
+			return
+		}
+		if err == ErrCannotUpdateNonDraft {
+			response.Error(w, http.StatusBadRequest, err.Error())
 			return
 		}
 		if validator.IsValidationError(err) {
 			response.Error(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		response.Error(w, http.StatusInternalServerError, "Failed to update customer")
+		response.Error(w, http.StatusInternalServerError, "Failed to update purchase order")
 		return
 	}
 
-	response.Success(w, customer)
+	response.Success(w, order)
 }
 
-// Delete deletes a customer (soft delete).
+// Delete cancels a purchase order (soft delete).
 func (h *Handler) Delete(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := uuid.Parse(idStr)
 	if err != nil {
-		response.Error(w, http.StatusBadRequest, "Invalid customer ID")
+		response.Error(w, http.StatusBadRequest, "Invalid purchase order ID")
 		return
 	}
 
 	if err := h.service.Delete(id); err != nil {
 		if errors.IsNotFound(err) {
-			response.Error(w, http.StatusNotFound, "Customer not found")
+			response.Error(w, http.StatusNotFound, "Purchase order not found")
 			return
 		}
-		response.Error(w, http.StatusInternalServerError, "Failed to delete customer")
+		if err == ErrCannotDeleteNonDraft {
+			response.Error(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		response.Error(w, http.StatusInternalServerError, "Failed to delete purchase order")
 		return
 	}
 

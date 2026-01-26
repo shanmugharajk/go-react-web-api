@@ -2,18 +2,18 @@ package customer
 
 import (
 	"github.com/google/uuid"
-	"github.com/shanmugharajk/go-react-web-api/api/internal/db"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/errors"
+	"gorm.io/gorm"
 )
 
 // CustomerRepository handles database operations for customers.
 type CustomerRepository struct {
-	db *db.DB
+	db *gorm.DB
 }
 
 // NewCustomerRepository creates a new CustomerRepository instance.
-func NewCustomerRepository(database *db.DB) *CustomerRepository {
-	return &CustomerRepository{db: database}
+func NewCustomerRepository(db *gorm.DB) *CustomerRepository {
+	return &CustomerRepository{db: db}
 }
 
 // FindAll retrieves all customers.

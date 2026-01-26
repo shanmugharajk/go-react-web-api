@@ -20,7 +20,7 @@ type Handler struct {
 
 // NewHandler creates a new product handler.
 func NewHandler(database *db.DB) *Handler {
-	repo := NewProductRepository(database)
+	repo := NewProductRepository(database.DB)
 	service := NewProductService(repo)
 	return &Handler{service: service}
 }
@@ -164,7 +164,7 @@ type CategoryHandler struct {
 
 // NewCategoryHandler creates a new product category handler.
 func NewCategoryHandler(database *db.DB) *CategoryHandler {
-	repo := NewCategoryRepository(database)
+	repo := NewCategoryRepository(database.DB)
 	service := NewCategoryService(repo)
 	return &CategoryHandler{service: service}
 }

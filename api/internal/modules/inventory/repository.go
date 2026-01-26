@@ -2,18 +2,18 @@ package inventory
 
 import (
 	"github.com/google/uuid"
-	"github.com/shanmugharajk/go-react-web-api/api/internal/db"
 	"github.com/shanmugharajk/go-react-web-api/api/internal/pkg/errors"
+	"gorm.io/gorm"
 )
 
 // BatchRepository handles data access for product batches.
 type BatchRepository struct {
-	db *db.DB
+	db *gorm.DB
 }
 
 // NewBatchRepository creates a new batch repository.
-func NewBatchRepository(database *db.DB) *BatchRepository {
-	return &BatchRepository{db: database}
+func NewBatchRepository(db *gorm.DB) *BatchRepository {
+	return &BatchRepository{db: db}
 }
 
 // FindAll retrieves all product batches.

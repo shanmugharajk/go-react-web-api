@@ -2,17 +2,17 @@ package auth
 
 import (
 	"github.com/google/uuid"
-	"github.com/shanmugharajk/go-react-web-api/api/internal/db"
+	"gorm.io/gorm"
 )
 
 // Repository handles data access for auth.
 type Repository struct {
-	db *db.DB
+	db *gorm.DB
 }
 
 // NewRepository creates a new auth repository.
-func NewRepository(database *db.DB) *Repository {
-	return &Repository{db: database}
+func NewRepository(db *gorm.DB) *Repository {
+	return &Repository{db: db}
 }
 
 // FindByEmail finds a user by email (case-insensitive).
